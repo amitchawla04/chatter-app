@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    background-color: #0a0a0a;
+    color: #f5f1e8;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: #0a0a0a;
+    color: #f5f1e8;
+    font-family: var(--font-body), Inter, system-ui, sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: #c9a84c;
+    color: #0a0a0a;
+  }
+
+  /* Subtle ambient grain — matches survey brand */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+}
+
+@layer components {
+  .display-text {
+    font-family: var(--font-display), "Cormorant Garamond", Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+
+  .display-italic {
+    font-family: var(--font-display), "Cormorant Garamond", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  .body-text {
+    font-family: var(--font-body), Inter, system-ui, sans-serif;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+    line-height: 1.6;
+  }
+
+  .label-text {
+    font-family: var(--font-body), Inter, system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+  }
+
+  .mono-text {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Primary button — gold on ink */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-8 py-3.5 transition-all duration-300;
+    background-color: #c9a84c;
+    color: #0a0a0a;
+    font-family: var(--font-body), Inter, sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border: 1px solid #c9a84c;
+  }
+  .btn-primary:hover {
+    background-color: transparent;
+    color: #c9a84c;
+  }
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Secondary button */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 transition-colors duration-300;
+    background-color: transparent;
+    color: #f5f1e8;
+    font-family: var(--font-body), Inter, sans-serif;
+    font-weight: 400;
+    font-size: 0.9rem;
+    border: 1px solid #2a2724;
+  }
+  .btn-secondary:hover {
+    border-color: #f5f1e8;
+  }
+
+  /* Topic chip — the ONE place we use rounded */
+  .topic-chip {
+    @apply inline-flex items-center gap-1.5 px-4 py-2 transition-all duration-200;
+    background-color: transparent;
+    border: 1px solid #2a2724;
+    border-radius: 9999px;
+    color: #f5f1e8;
+    font-family: var(--font-body), Inter, sans-serif;
+    font-size: 0.8125rem;
+  }
+  .topic-chip:hover {
+    border-color: #c9a84c;
+  }
+  .topic-chip[data-selected="true"] {
+    border-color: #c9a84c;
+    background-color: rgba(201, 168, 76, 0.1);
+    color: #f5f1e8;
+  }
+
+  /* Whisper card */
+  .whisper-card {
+    @apply block w-full p-5 transition-colors duration-200;
+    background-color: #1a1a1a;
+    border: 1px solid #2a2724;
+  }
+  .whisper-card:hover {
+    border-color: #c9a84c33;
+  }
+
+  /* Tab bar bottom navigation */
+  .tab-bar {
+    @apply fixed bottom-0 inset-x-0 flex items-center justify-around;
+    background-color: #0a0a0a;
+    border-top: 1px solid #2a2724;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 50;
+  }
+  .tab-bar-item {
+    @apply flex flex-col items-center gap-1 px-4 py-3 transition-colors duration-200;
+    color: #6b6b6b;
+  }
+  .tab-bar-item[data-active="true"] {
+    color: #c9a84c;
+  }
+  .tab-bar-item[data-active="true"]::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 16px;
+    height: 1px;
+    background-color: #c9a84c;
+  }
+}
