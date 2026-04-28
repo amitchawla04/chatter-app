@@ -26,6 +26,7 @@ import {
 } from "@/lib/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import { getT } from "@/lib/i18n-server";
 
 export const revalidate = 30; // feed refreshes every 30s on server
 
@@ -37,10 +38,11 @@ export default async function HomePage({
   const params = await searchParams;
   const filter = params.filter === "whispers" ? "whispers" : "all";
 
-  const [whispers, currentUser, glimpses] = await Promise.all([
+  const [whispers, currentUser, glimpses, { t }] = await Promise.all([
     fetchPublicWhispers(40),
     fetchCurrentUserRow(),
     fetchGlimpseImages(12),
+    getT(),
   ]);
 
   const ids = whispers.map((w) => w.id);
@@ -79,7 +81,7 @@ export default async function HomePage({
             className="inline-flex items-center gap-1.5 mono-text text-[10px] uppercase tracking-wider text-red hover:text-ink transition"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-red animate-pulse" />
-            what&rsquo;s live
+            {t("home.whats_live")}
           </Link>
           {currentUser ? (
             <Link
@@ -93,7 +95,7 @@ export default async function HomePage({
               href="/auth/sign-in"
               className="label-text text-red hover:text-ink transition text-[10px]"
             >
-              Sign in
+              {t("auth.sign_in")}
             </Link>
           )}
         </div>
@@ -114,7 +116,7 @@ export default async function HomePage({
       <section className="pb-8">
         {visible.length === 0 ? (
           <p className="py-16 text-center text-muted text-sm">
-            No whispers yet. Be the first.
+            {t("home.empty")}
           </p>
         ) : (
           visible.map((w, i) => {
@@ -146,7 +148,7 @@ export default async function HomePage({
       <Link
         href="/compose"
         className="fixed bottom-24 right-5 w-14 h-14 rounded-full bg-red text-paper flex items-center justify-center shadow-lg hover:bg-paper transition-colors z-40"
-        aria-label="Compose a whisper"
+        aria-label={t("home.compose_aria")}
       >
         <PenLine size={22} strokeWidth={1.8} />
       </Link>

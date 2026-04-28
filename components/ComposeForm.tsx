@@ -259,7 +259,7 @@ export function ComposeForm({ topics, initialTopicId }: Props) {
           </div>
         )}
         {modality === "voice" && (
-          <>
+          <ScopeCanvas scope={effectiveScope} isBreath={false}>
             <VoiceRecorder
               onRecorded={(blob, dur) => {
                 setVoiceBlob(blob);
@@ -271,38 +271,54 @@ export function ComposeForm({ topics, initialTopicId }: Props) {
               }}
             />
             {voiceBlob && (
-              <div>
+              <div className="mt-3">
                 <label className="label-text text-muted block mb-2">caption (optional)</label>
                 <textarea
                   value={text}
                   onChange={(e) => setText(e.target.value.slice(0, charLimit))}
-                  placeholder="add a caption…"
+                  placeholder={
+                    effectiveScope === "circle"
+                      ? "the village will hear your voice…"
+                      : effectiveScope === "private"
+                        ? "a single voice memo, sealed…"
+                        : effectiveScope === "network"
+                          ? "your insider network, listening…"
+                          : "a caption for the open feed…"
+                  }
                   className="w-full bg-transparent border border-line focus:border-red text-ink placeholder-muted-soft px-3 py-2 outline-none transition-colors text-sm"
                   rows={2}
                 />
               </div>
             )}
-          </>
+          </ScopeCanvas>
         )}
         {modality === "image" && (
-          <>
+          <ScopeCanvas scope={effectiveScope} isBreath={false}>
             <ImagePicker
               onPicked={setImageFile}
               onCleared={() => setImageFile(null)}
             />
             {imageFile && (
-              <div>
+              <div className="mt-3">
                 <label className="label-text text-muted block mb-2">caption (optional)</label>
                 <textarea
                   value={text}
                   onChange={(e) => setText(e.target.value.slice(0, charLimit))}
-                  placeholder="add a caption…"
+                  placeholder={
+                    effectiveScope === "circle"
+                      ? "the village sees this first…"
+                      : effectiveScope === "private"
+                        ? "a sealed photo, opened once…"
+                        : effectiveScope === "network"
+                          ? "your insider network is looking…"
+                          : "a caption for the open feed…"
+                  }
                   className="w-full bg-transparent border border-line focus:border-red text-ink placeholder-muted-soft px-3 py-2 outline-none transition-colors text-sm"
                   rows={2}
                 />
               </div>
             )}
-          </>
+          </ScopeCanvas>
         )}
         {modality === "video" && (
           <div className="py-16 flex items-center justify-center border border-dashed border-line">
@@ -413,6 +429,53 @@ export function ComposeForm({ topics, initialTopicId }: Props) {
         {error && <p className="text-warn text-sm">{error}</p>}
       </form>
     </main>
+  );
+}
+
+/**
+ * ScopeCanvas — the canvas that physically shifts based on scope.
+ * Wraps text/voice/image/video composer body. Pact 5: scope is felt.
+ */
+function ScopeCanvas({
+  scope,
+  isBreath,
+  children,
+}: {
+  scope: Scope;
+  isBreath: boolean;
+  children: React.ReactNode;
+}) {
+  const descriptor = isBreath
+    ? "breath · 60 chars · your village · 24h"
+    : scope === "circle"
+      ? "to your village · the people who hear you first"
+      : scope === "network"
+        ? "to your network · vouched insiders only"
+        : scope === "private"
+          ? "to one person · view-once · a sealed envelope"
+          : "to the open · every tuned-in topic listener";
+
+  const wrap = isBreath
+    ? "max-w-md w-full border-blue bg-blue/5"
+    : scope === "circle"
+      ? "max-w-md w-full border-blue bg-blue/5"
+      : scope === "network"
+        ? "max-w-xl w-full border-blue/60"
+        : scope === "private"
+          ? "max-w-sm w-full border-ink bg-ink/[0.03]"
+          : "max-w-2xl w-full border-red";
+
+  return (
+    <div className="flex justify-center">
+      <div
+        className={`transition-all duration-500 ease-out border-l-2 pl-5 py-3 ${wrap}`}
+      >
+        <div className="mono-text text-[10px] uppercase tracking-[0.2em] text-muted mb-3">
+          {descriptor}
+        </div>
+        {children}
+      </div>
+    </div>
   );
 }
 

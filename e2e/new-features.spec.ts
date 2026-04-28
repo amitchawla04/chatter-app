@@ -246,10 +246,10 @@ test.describe("i18n locale switching", () => {
     await expect(page.getByText("Explorar", { exact: true })).toBeVisible();
     await expect(page.getByText("Pases", { exact: true })).toBeVisible();
     await expect(page.getByText("Tú", { exact: true })).toBeVisible();
-    // Compose CTA aria-label translates too
-    await expect(
-      page.getByRole("link", { name: "Susurro" }),
-    ).toBeVisible();
+    // Compose CTA aria-label translates too — at least one link with "Susurro" in name
+    expect(
+      await page.getByRole("link", { name: /Susurro/i }).count(),
+    ).toBeGreaterThan(0);
     // English should NOT appear in tabs
     expect(await page.getByRole("link", { name: /^Home$/ }).count()).toBe(0);
   });

@@ -16,11 +16,13 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ChatterMark } from "@/components/ChatterMark";
 import { createClient } from "@/lib/supabase/client";
+import { useT } from "@/components/I18nProvider";
 
 type Step = "email" | "code";
 
 export default function SignInPage() {
   const router = useRouter();
+  const t = useT();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -89,7 +91,7 @@ export default function SignInPage() {
           <ChatterMark size="sm" pulse="breath" />
         </Link>
         <Link href="/" className="label-text text-muted hover:text-ink transition">
-          ← back
+          {t("signin.back")}
         </Link>
       </header>
 
@@ -97,6 +99,7 @@ export default function SignInPage() {
         <div className="max-w-md mx-auto w-full">
           {step === "email" ? (
             <EmailStep
+              t={t}
               email={email}
               setEmail={setEmail}
               onSubmit={sendCode}
@@ -105,6 +108,7 @@ export default function SignInPage() {
             />
           ) : (
             <CodeStep
+              t={t}
               email={email}
               code={code}
               setCode={setCode}
@@ -127,11 +131,11 @@ export default function SignInPage() {
             transition={{ duration: 0.6, delay: 0.5 }}
             className="mt-10 mono-text text-xs text-muted"
           >
-            by continuing, you accept{" "}
+            {t("signin.pact_lead")}{" "}
             <Link href="/pact" className="text-red hover:text-ink transition">
-              the chatter pact
+              {t("signin.pact_link")}
             </Link>
-            {" — 14 commitments we make to you."}
+            {" "}{t("signin.pact_tail")}
           </motion.p>
         </div>
       </section>
@@ -140,12 +144,14 @@ export default function SignInPage() {
 }
 
 function EmailStep({
+  t,
   email,
   setEmail,
   onSubmit,
   status,
   message,
 }: {
+  t: (k: string) => string;
   email: string;
   setEmail: (s: string) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -160,7 +166,7 @@ function EmailStep({
         transition={{ duration: 0.6 }}
         className="display-text text-3xl sm:text-4xl text-ink mb-3"
       >
-        claim your handle.
+        {t("signin.heading_email")}
       </motion.h1>
       <motion.p
         initial={{ opacity: 0 }}
@@ -168,7 +174,7 @@ function EmailStep({
         transition={{ duration: 0.6, delay: 0.1 }}
         className="body-text text-muted mb-10"
       >
-        we&rsquo;ll send a 6-digit code. no passwords. no tracking outside chatter.
+        {t("signin.sub_email")}
       </motion.p>
 
       <motion.form
@@ -180,7 +186,7 @@ function EmailStep({
       >
         <div>
           <label htmlFor="email" className="label-text text-muted block mb-2">
-            email
+            {t("signin.email_label")}
           </label>
           <input
             id="email"
@@ -190,7 +196,7 @@ function EmailStep({
             autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@domain.com"
+            placeholder={t("signin.email_placeholder")}
             className="w-full bg-transparent border border-line focus:border-gold text-ink placeholder-muted-soft px-4 py-3 outline-none transition-colors"
           />
         </div>
@@ -200,7 +206,7 @@ function EmailStep({
           disabled={status === "pending" || !email.trim()}
           className="btn-primary w-full justify-center"
         >
-          {status === "pending" ? "sending code…" : "send code"}
+          {status === "pending" ? t("signin.sending") : t("signin.send_code")}
           {status !== "pending" && <span>→</span>}
         </button>
 
@@ -213,6 +219,7 @@ function EmailStep({
 }
 
 function CodeStep({
+  t,
   email,
   code,
   setCode,
@@ -222,6 +229,7 @@ function CodeStep({
   status,
   message,
 }: {
+  t: (k: string) => string;
   email: string;
   code: string;
   setCode: (s: string) => void;
@@ -239,7 +247,7 @@ function CodeStep({
         transition={{ duration: 0.6 }}
         className="display-text text-3xl sm:text-4xl text-ink mb-3"
       >
-        check your inbox.
+        {t("signin.heading_code")}
       </motion.h1>
       <motion.p
         initial={{ opacity: 0 }}
@@ -247,7 +255,7 @@ function CodeStep({
         transition={{ duration: 0.6, delay: 0.1 }}
         className="body-text text-muted mb-10"
       >
-        we sent a 6-digit code to <span className="text-ink">{email}</span>. enter it below.
+        {t("signin.sub_code")} <span className="text-ink">{email}</span>.
       </motion.p>
 
       <motion.form
@@ -259,7 +267,7 @@ function CodeStep({
       >
         <div>
           <label htmlFor="code" className="label-text text-muted block mb-2">
-            code
+            {t("signin.code_label")}
           </label>
           <input
             id="code"
@@ -281,7 +289,7 @@ function CodeStep({
           disabled={status === "pending" || code.length !== 6}
           className="btn-primary w-full justify-center"
         >
-          {status === "pending" ? "verifying…" : "verify & continue"}
+          {status === "pending" ? t("signin.verifying") : t("signin.verify")}
           {status !== "pending" && <span>→</span>}
         </button>
 
@@ -295,14 +303,14 @@ function CodeStep({
             onClick={onBack}
             className="text-muted hover:text-ink transition-colors"
           >
-            ← different email
+            {t("signin.different_email")}
           </button>
           <button
             type="button"
             onClick={onResend}
             className="text-red hover:text-ink transition-colors"
           >
-            resend code
+            {t("signin.resend")}
           </button>
         </div>
       </motion.form>

@@ -18,6 +18,8 @@ import {
   type WhisperJoinRow,
   type WhisperRow,
 } from "@/lib/whisper";
+import { getT } from "@/lib/i18n-server";
+import type { Translator } from "@/lib/i18n";
 
 export const revalidate = 30;
 
@@ -27,8 +29,10 @@ export default async function YouPage() {
     data: { user: authUser },
   } = await supabase.auth.getUser();
 
+  const { t } = await getT();
+
   if (!authUser) {
-    return <NotSignedIn />;
+    return <NotSignedIn t={t} />;
   }
 
   const admin = createAdminClient();
@@ -39,12 +43,12 @@ export default async function YouPage() {
     .maybeSingle();
 
   if (!me) {
-    return <NotSignedIn />;
+    return <NotSignedIn t={t} />;
   }
 
   // Gate state
   if (!me.reciprocity_gate_crossed) {
-    return <GateNotCrossed displayName={me.display_name} handle={me.handle} />;
+    return <GateNotCrossed t={t} displayName={me.display_name} handle={me.handle} />;
   }
 
   // Own whispers
@@ -103,9 +107,9 @@ export default async function YouPage() {
         )}
 
         <div className="grid grid-cols-3 gap-4 pt-4 border-t border-line/50">
-          <Stat label="whispers" value={whispers.length} />
-          <Stat label="tuned" value={tunedCount ?? 0} />
-          <Stat label="trust" value={me.trust_score ?? 0} />
+          <Stat label={t("you.stats.whispers")} value={whispers.length} />
+          <Stat label={t("you.stats.tuned")} value={tunedCount ?? 0} />
+          <Stat label={t("you.stats.trust")} value={me.trust_score ?? 0} />
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-2">
@@ -113,29 +117,29 @@ export default async function YouPage() {
             href="/v"
             className="block border border-line px-3 py-2.5 text-center hover:border-red transition"
           >
-            <div className="label-text text-[10px] text-muted">village</div>
-            <div className="mono-text text-sm text-ink">threads</div>
+            <div className="label-text text-[10px] text-muted">{t("you.tile.village")}</div>
+            <div className="mono-text text-sm text-ink">{t("you.tile.threads")}</div>
           </Link>
           <Link
             href="/you/feeds"
             className="block border border-line px-3 py-2.5 text-center hover:border-red transition"
           >
-            <div className="label-text text-[10px] text-muted">custom</div>
-            <div className="mono-text text-sm text-ink">feeds</div>
+            <div className="label-text text-[10px] text-muted">{t("you.tile.custom")}</div>
+            <div className="mono-text text-sm text-ink">{t("you.tile.feeds")}</div>
           </Link>
           <Link
             href="/you/equity"
             className="block border border-line px-3 py-2.5 text-center hover:border-red transition"
           >
-            <div className="label-text text-[10px] text-muted">CCEP</div>
-            <div className="mono-text text-sm text-ink">equity</div>
+            <div className="label-text text-[10px] text-muted">{t("you.tile.ccep")}</div>
+            <div className="mono-text text-sm text-ink">{t("you.tile.equity")}</div>
           </Link>
           <Link
             href="/you/vouches/network"
             className="block border border-line px-3 py-2.5 text-center hover:border-red transition"
           >
-            <div className="label-text text-[10px] text-muted">vouch</div>
-            <div className="mono-text text-sm text-ink">network</div>
+            <div className="label-text text-[10px] text-muted">{t("you.tile.vouch")}</div>
+            <div className="mono-text text-sm text-ink">{t("you.tile.network")}</div>
           </Link>
         </div>
       </section>
@@ -172,7 +176,7 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function NotSignedIn() {
+function NotSignedIn({ t }: { t: Translator }) {
   return (
     <main className="min-h-screen pb-28 flex flex-col">
       <header className="px-5 py-4 flex items-center justify-between border-b border-line">
@@ -183,13 +187,13 @@ function NotSignedIn() {
           <Lock size={22} strokeWidth={1.3} className="text-muted" />
         </div>
         <h1 className="display-text text-3xl text-ink mb-4 max-w-md">
-          this is where you&rsquo;ll live.
+          {t("you.notsignedin.heading")}
         </h1>
         <p className="body-text text-muted mb-10 max-w-sm">
-          claim your handle first. it takes one tap.
+          {t("you.notsignedin.body")}
         </p>
         <Link href="/auth/sign-in" className="btn-primary">
-          sign in <span>→</span>
+          {t("auth.sign_in")} <span>→</span>
         </Link>
       </section>
       <TabBar />
@@ -198,9 +202,11 @@ function NotSignedIn() {
 }
 
 function GateNotCrossed({
+  t,
   displayName,
   handle,
 }: {
+  t: Translator;
   displayName: string;
   handle: string;
 }) {
@@ -218,17 +224,17 @@ function GateNotCrossed({
           @{handle}
         </p>
         <h1 className="display-text text-3xl sm:text-4xl text-ink mb-4 max-w-md">
-          to hear what your village says about you,
+          {t("you.gate.heading1")}
           <br />
           <span className="display-italic text-gold">
-            first say something about someone else.
+            {t("you.gate.heading2")}
           </span>
         </h1>
         <p className="body-text text-muted mb-10 max-w-sm">
-          welcome, {displayName}.
+          {t("you.gate.welcome")} {displayName}.
         </p>
         <Link href="/compose" className="btn-primary">
-          write your first whisper <span>→</span>
+          {t("you.gate.cta")} <span>→</span>
         </Link>
       </section>
       <TabBar />

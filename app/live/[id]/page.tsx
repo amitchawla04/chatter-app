@@ -10,6 +10,7 @@ import { ChatterMark } from "@/components/ChatterMark";
 import { TabBar } from "@/components/TabBar";
 import { WhisperCard } from "@/components/WhisperCard";
 import { WatchTogether } from "@/components/WatchTogether";
+import { MomentWhisper } from "@/components/MomentWhisper";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { fetchTopicWhispers, fetchEchoedIds, fetchSavedIds } from "@/lib/queries";
@@ -202,14 +203,19 @@ export default async function LiveEventPage({
         )}
       </section>
 
-      {/* Sticky composer */}
-      <Link
-        href={`/compose?topic=${e.topic_id}`}
-        className="fixed bottom-24 right-5 w-14 h-14 rounded-full bg-red text-paper flex items-center justify-center shadow-lg hover:bg-paper transition-colors z-40"
-        aria-label="Whisper from the event"
-      >
-        <PenLine size={22} strokeWidth={1.8} />
-      </Link>
+      {/* Moment-whisper — opens inline mini composer with event context, auto-triggers on score change */}
+      <MomentWhisper
+        eventId={e.id}
+        eventTopicId={e.topic_id}
+        eventTitle={e.title}
+        isAuthed={isAuthed}
+        homeLabel={e.home_label}
+        awayLabel={e.away_label}
+        homeScore={e.home_score}
+        awayScore={e.away_score}
+        minuteLabel={e.minute_label}
+        status={e.status}
+      />
 
       <TabBar />
     </main>

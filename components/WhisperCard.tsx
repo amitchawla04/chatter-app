@@ -135,6 +135,41 @@ export function WhisperCard({
     }
   };
 
+  // Long-press whisper-back — third gesture (after swipe-pass and double-tap-echo)
+  // Hold for 600ms without moving > 8px → opens an in-card mini-composer.
+  const [replyOpen, setReplyOpen] = useState(false);
+  const longPressTimer = useRef<number | null>(null);
+  const longPressOrigin = useRef<{ x: number; y: number } | null>(null);
+  const longPressFired = useRef<boolean>(false);
+
+  const startLongPress = (e: React.PointerEvent) => {
+    if (!isAuthed) return;
+    longPressOrigin.current = { x: e.clientX, y: e.clientY };
+    longPressFired.current = false;
+    longPressTimer.current = window.setTimeout(() => {
+      longPressFired.current = true;
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate([10, 30, 10, 30, 10]); // 3-pulse signature distinct from pass
+      }
+      setReplyOpen(true);
+    }, 600);
+  };
+  const moveLongPress = (e: React.PointerEvent) => {
+    if (!longPressTimer.current || !longPressOrigin.current) return;
+    const dx = e.clientX - longPressOrigin.current.x;
+    const dy = e.clientY - longPressOrigin.current.y;
+    if (Math.hypot(dx, dy) > 8) {
+      window.clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+  const endLongPress = () => {
+    if (longPressTimer.current) {
+      window.clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
   // Swipe-right pass (Visual DNA Principle 6 — pass-signature move)
   const x = useMotionValue(0);
   const passHint = useTransform(x, [0, 80, 160], [0, 0.6, 1]);
@@ -149,6 +184,15 @@ export function WhisperCard({
     x.set(0);
   };
 
+  const handleClick = () => {
+    // If long-press fired, suppress the click-through to double-tap handler
+    if (longPressFired.current) {
+      longPressFired.current = false;
+      return;
+    }
+    handleDoubleTap();
+  };
+
   return (
     <>
       <motion.article
@@ -156,7 +200,12 @@ export function WhisperCard({
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.3}
         onDragEnd={handleDragEnd}
-        onClick={handleDoubleTap}
+        onClick={handleClick}
+        onPointerDown={startLongPress}
+        onPointerMove={moveLongPress}
+        onPointerUp={endLongPress}
+        onPointerCancel={endLongPress}
+        onPointerLeave={endLongPress}
         style={{ x, borderLeft: `2px solid ${scopeColor}` }}
         className="relative block pl-5 pr-5 py-5 border-b border-line bg-paper select-none"
       >
@@ -349,7 +398,115 @@ export function WhisperCard({
           onClose={() => setPassOpen(false)}
         />
       )}
+
+      {replyOpen && (
+        <InlineReplyMini
+          parentId={whisper.id}
+          topicId={whisper.topic_id}
+          parentExcerpt={quoteText.slice(0, 80)}
+          onClose={() => setReplyOpen(false)}
+        />
+      )}
     </>
+  );
+}
+
+/**
+ * InlineReplyMini — long-press-triggered mini composer that appears
+ * as a card-sized overlay without leaving the home flow.
+ * Pact: same reply-approval rules as full /w/[id] flow.
+ */
+function InlineReplyMini({
+  parentId,
+  topicId,
+  parentExcerpt,
+  onClose,
+}: {
+  parentId: string;
+  topicId: string;
+  parentExcerpt: string;
+  onClose: () => void;
+}) {
+  const [text, setText] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [posted, setPosted] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    setPending(true);
+    setError(null);
+    const { postReply } = await import("@/lib/reply-actions");
+    const res = await postReply({ parentId, topicId, content: text.trim() });
+    setPending(false);
+    if (!res.ok) {
+      setError(res.error ?? "couldn't send.");
+      return;
+    }
+    setPosted(true);
+    setTimeout(onClose, 1200);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[80] bg-canvas/70 backdrop-blur-sm flex items-end sm:items-center justify-center px-4"
+      onClick={onClose}
+      role="dialog"
+      aria-label="Long-press whisper-back"
+    >
+      <form
+        onSubmit={submit}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full sm:max-w-md bg-paper border border-line p-5 space-y-4"
+      >
+        <div className="flex items-center justify-between">
+          <span className="mono-text text-[10px] uppercase tracking-wider text-red">
+            whisper-back
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-muted hover:text-ink transition"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+        <p className="display-italic text-sm text-muted border-l-2 border-gold/40 pl-3 line-clamp-2">
+          &ldquo;{parentExcerpt}…&rdquo;
+        </p>
+        {posted ? (
+          <p className="display-italic text-2xl text-red text-center py-4">
+            sent.
+          </p>
+        ) : (
+          <>
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value.slice(0, 280))}
+              placeholder="say it back…"
+              className="w-full bg-transparent border border-line focus:border-red text-ink placeholder-muted-soft px-3 py-2 outline-none transition-colors text-sm"
+              rows={3}
+              autoFocus
+            />
+            <div className="flex items-center justify-between">
+              <span className="mono-text text-[10px] text-muted">
+                {text.length} / 280
+              </span>
+              <button
+                type="submit"
+                disabled={pending || !text.trim()}
+                className="btn-primary px-5 py-2 text-sm disabled:opacity-30"
+              >
+                {pending ? "sending…" : "whisper back"}
+              </button>
+            </div>
+            {error && <p className="text-warn text-xs">{error}</p>}
+          </>
+        )}
+      </form>
+    </div>
   );
 }
 
