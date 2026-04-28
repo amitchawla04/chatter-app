@@ -2,47 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ══════════════════════════════════════════════════════════════════
+   Chatter — LIGHT ENTERTAINMENT REGISTER · v2 (2026-04-25)
+   Warm white canvas · near-black ink · red accent · Cormorant display
+   ══════════════════════════════════════════════════════════════════ */
+
 @layer base {
   html {
-    background-color: #0a0a0a;
-    color: #f5f1e8;
+    background-color: #FAF9F6;
+    color: #0A0A0A;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
 
   body {
-    background-color: #0a0a0a;
-    color: #f5f1e8;
+    background-color: #FAF9F6;
+    color: #0A0A0A;
     font-family: var(--font-body), Inter, system-ui, sans-serif;
     overflow-x: hidden;
     min-height: 100vh;
   }
 
   ::selection {
-    background-color: #c9a84c;
-    color: #0a0a0a;
-  }
-
-  /* Subtle ambient grain — matches survey brand */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 100;
-    opacity: 0.04;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    mix-blend-mode: overlay;
+    background-color: #FF2D2D;
+    color: #FFFFFF;
   }
 }
 
 @layer components {
+  /* ─── Typography primitives ─── */
   .display-text {
     font-family: var(--font-display), "Cormorant Garamond", Georgia, serif;
-    font-weight: 400;
+    font-weight: 500;
     letter-spacing: -0.02em;
     line-height: 1.05;
+    color: #0A0A0A;
   }
 
   .display-italic {
@@ -50,19 +45,20 @@
     font-style: italic;
     font-weight: 400;
     letter-spacing: -0.01em;
+    color: #0A0A0A;
   }
 
   .body-text {
     font-family: var(--font-body), Inter, system-ui, sans-serif;
     font-weight: 400;
     letter-spacing: -0.005em;
-    line-height: 1.6;
+    line-height: 1.55;
   }
 
   .label-text {
     font-family: var(--font-body), Inter, system-ui, sans-serif;
     font-weight: 500;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     font-size: 0.7rem;
   }
@@ -72,89 +68,274 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Primary button — gold on ink */
+  /* ─── Primary button — red on white ─── */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-8 py-3.5 transition-all duration-300;
-    background-color: #c9a84c;
-    color: #0a0a0a;
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3 transition-all duration-300;
+    background-color: #FF2D2D;
+    color: #FFFFFF;
     font-family: var(--font-body), Inter, sans-serif;
     font-weight: 500;
     font-size: 0.95rem;
-    border: 1px solid #c9a84c;
+    border: 1px solid #FF2D2D;
   }
   .btn-primary:hover {
-    background-color: transparent;
-    color: #c9a84c;
+    background-color: #E02020;
+    border-color: #E02020;
   }
   .btn-primary:disabled {
-    opacity: 0.4;
+    opacity: 0.35;
     cursor: not-allowed;
+    background-color: #FF2D2D;
   }
 
-  /* Secondary button */
+  /* ─── Secondary button — ink outline ─── */
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 transition-colors duration-300;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 transition-colors duration-300;
     background-color: transparent;
-    color: #f5f1e8;
+    color: #0A0A0A;
     font-family: var(--font-body), Inter, sans-serif;
     font-weight: 400;
     font-size: 0.9rem;
-    border: 1px solid #2a2724;
+    border: 1px solid #E8E4DC;
   }
   .btn-secondary:hover {
-    border-color: #f5f1e8;
+    border-color: #0A0A0A;
   }
 
-  /* Topic chip — the ONE place we use rounded */
+  /* ─── Topic chip ─── */
   .topic-chip {
-    @apply inline-flex items-center gap-1.5 px-4 py-2 transition-all duration-200;
-    background-color: transparent;
-    border: 1px solid #2a2724;
+    @apply inline-flex items-center gap-1.5 px-3.5 py-1.5 transition-all duration-200;
+    background-color: #FFFFFF;
+    border: 1px solid #E8E4DC;
     border-radius: 9999px;
-    color: #f5f1e8;
+    color: #0A0A0A;
     font-family: var(--font-body), Inter, sans-serif;
     font-size: 0.8125rem;
   }
   .topic-chip:hover {
-    border-color: #c9a84c;
+    border-color: #0A0A0A;
   }
   .topic-chip[data-selected="true"] {
-    border-color: #c9a84c;
-    background-color: rgba(201, 168, 76, 0.1);
-    color: #f5f1e8;
+    border-color: #FF2D2D;
+    background-color: #FFE8E8;
+    color: #FF2D2D;
   }
 
-  /* Whisper card */
+  /* ─── Whisper card surface ─── */
   .whisper-card {
     @apply block w-full p-5 transition-colors duration-200;
-    background-color: #1a1a1a;
-    border: 1px solid #2a2724;
-  }
-  .whisper-card:hover {
-    border-color: #c9a84c33;
+    background-color: #FFFFFF;
+    border-top: 1px solid #F0EDE6;
+    border-bottom: 1px solid #F0EDE6;
   }
 
-  /* Tab bar bottom navigation */
+  /* ─── Tab bar (bottom nav) ─── */
   .tab-bar {
     @apply fixed bottom-0 inset-x-0 flex items-center justify-around;
-    background-color: #0a0a0a;
-    border-top: 1px solid #2a2724;
+    background-color: #FFFFFF;
+    border-top: 1px solid #E8E4DC;
     padding-bottom: env(safe-area-inset-bottom);
     z-index: 50;
   }
   .tab-bar-item {
     @apply flex flex-col items-center gap-1 px-4 py-3 transition-colors duration-200;
-    color: #6b6b6b;
+    color: #A8A4A0;
   }
   .tab-bar-item[data-active="true"] {
-    color: #c9a84c;
+    color: #FF2D2D;
   }
   .tab-bar-item[data-active="true"]::before {
     content: "";
     position: absolute;
     top: 0;
     width: 16px;
-    height: 1px;
-    background-color: #c9a84c;
+    height: 2px;
+    background-color: #FF2D2D;
   }
+
+  /* ─── Pact pills above the fold ─── */
+  .pact-pill {
+    @apply inline-flex items-center px-3 py-1.5 text-xs transition-colors duration-200;
+    background-color: #FFFFFF;
+    border: 1px solid #E8E4DC;
+    color: #FF2D2D;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .pact-pill:hover {
+    border-color: #FF2D2D;
+    background-color: #FFE8E8;
+  }
+
+  /* ─── Proof whisper (landing hero) ─── */
+  .proof-whisper {
+    @apply relative block;
+    border-left: 2px solid #FF2D2D;
+    padding-left: 1.5rem;
+  }
+  .proof-whisper-quote {
+    font-family: var(--font-display), "Cormorant Garamond", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.32;
+    color: #0A0A0A;
+  }
+  .proof-whisper-byline {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: #767676;
+  }
+  .proof-whisper-byline .role {
+    color: #C9A84C;
+    font-style: italic;
+  }
+  .proof-whisper-ranking-rule {
+    font-family: var(--font-body), Inter, sans-serif;
+    font-size: 0.75rem;
+    font-style: italic;
+    color: #767676;
+    letter-spacing: 0.01em;
+  }
+
+  /* ─── Live ticker dot — breathes synced with wordmark ─── */
+  .live-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #FF2D2D;
+    animation: chatterBreath 1200ms ease-in-out infinite;
+    vertical-align: middle;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   Wordmark breathing — brand signature (Visual DNA Principle 9)
+   Period color = RED (#FF2D2D) on white — original v2-S1 direction
+════════════════════════════════════════════════════════════════════ */
+@keyframes chatterBreath {
+  0%, 100% {
+    opacity: 0.72;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes chatterEmber {
+  0%   { opacity: 0.7; transform: scale(1); }
+  10%  { opacity: 1;   transform: scale(1.15); }
+  20%  { opacity: 0.7; transform: scale(1); }
+  30%  { opacity: 1;   transform: scale(1.15); }
+  40%  { opacity: 0.7; transform: scale(1); }
+  50%  { opacity: 1;   transform: scale(1.2); }
+  90%, 100% { opacity: 1; transform: scale(1.05); }
+}
+
+.chatter-period-breath {
+  animation: chatterBreath 1200ms ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.chatter-period-ember {
+  animation: chatterEmber 4800ms ease-in-out forwards;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chatter-period-breath,
+  .chatter-period-ember,
+  .live-dot,
+  .animate-pulse {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Accessibility (Phase κ)
+   Focus rings · skip-link · screen-reader utilities
+════════════════════════════════════════════════════════════════ */
+
+:focus-visible {
+  outline: 2px solid #FF2D2D;
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+button:focus-visible,
+a:focus-visible,
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.topic-chip:focus-visible {
+  outline: 2px solid #FF2D2D;
+  outline-offset: 3px;
+}
+
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
+
+/* Skip-to-main — first tab-stop on every page */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #FF2D2D;
+  color: #FFFFFF;
+  padding: 8px 16px;
+  z-index: 9999;
+  font-family: var(--font-body), Inter, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: top 150ms ease-out;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* Screen-reader-only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─── Hide scrollbars on chip-rows ─── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

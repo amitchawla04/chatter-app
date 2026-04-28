@@ -1,110 +1,93 @@
-"use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+/**
+ * Onboarding step 1 of 2 — topic picker.
+ * Server component — redirects unauthenticated users to sign-in.
+ * Loads featured topics from lib/topics.ts for instant paint.
+ */
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ChatterMark } from "@/components/ChatterMark";
-import { competitionTopics, worldCupTeams, premierLeagueClubs, breakoutPlayers } from "@/lib/topics";
+import { createClient as createServerClient } from "@/lib/supabase/server";
+import { OnboardingTopicPicker } from "@/components/OnboardingTopicPicker";
+import {
+  competitionTopics,
+  worldCupTeams,
+  premierLeagueClubs,
+  breakoutPlayers,
+} from "@/lib/topics";
 
-// Featured topics for the onboarding picker — curated top 24 for fast decision
 const featured = [
   ...competitionTopics.slice(0, 3),
   ...worldCupTeams.filter((t) =>
-    ["nt-england", "nt-france", "nt-spain", "nt-brazil", "nt-argentina", "nt-usa", "nt-india"].includes(t.id),
+    [
+      "nt-england",
+      "nt-france",
+      "nt-spain",
+      "nt-brazil",
+      "nt-argentina",
+      "nt-usa",
+      "nt-india",
+    ].includes(t.id),
   ),
   ...premierLeagueClubs.filter((t) =>
-    ["epl-arsenal", "epl-man-united", "epl-liverpool", "epl-man-city", "epl-chelsea", "epl-tottenham"].includes(t.id),
+    [
+      "epl-arsenal",
+      "epl-man-united",
+      "epl-liverpool",
+      "epl-man-city",
+      "epl-chelsea",
+      "epl-tottenham",
+    ].includes(t.id),
   ),
   ...breakoutPlayers.slice(0, 6),
 ];
 
-export default function OnboardingPage() {
-  const router = useRouter();
-  const [selected, setSelected] = useState<string[]>([]);
+export default async function OnboardingPage() {
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const toggle = (id: string) => {
-    setSelected((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
-  };
+  if (!user) {
+    redirect("/auth/sign-in");
+  }
 
-  const proceed = () => {
-    if (selected.length < 5) return;
-    if (typeof window !== "undefined") {
-      localStorage.setItem("chatter_onboarded_topics", JSON.stringify(selected));
-    }
-    router.push("/home");
-  };
+  // Gate: require age verification before topic picker
+  const { createAdminClient } = await import("@/lib/supabase/admin");
+  const admin = createAdminClient();
+  const { data: me } = await admin
+    .from("users")
+    .select("age_verified_at")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!me?.age_verified_at) {
+    redirect("/onboarding/age");
+  }
 
   return (
     <main className="min-h-screen flex flex-col">
-      <header className="px-6 sm:px-10 pt-8 flex justify-between items-center">
-        <ChatterMark size="sm" />
+      <header className="px-6 sm:px-10 pt-6 sm:pt-8 flex justify-between items-center">
+        <Link href="/">
+          <ChatterMark size="sm" pulse="breath" />
+        </Link>
         <span className="label-text text-muted">Step 1 of 2</span>
       </header>
 
       <section className="flex-1 px-6 sm:px-10 py-10 sm:py-14">
         <div className="max-w-3xl mx-auto w-full">
-          <motion.p
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="label-text text-gold mb-6"
-          >
+          <p className="label-text text-red mb-6">
             Tune into what you care about
-          </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="display-text text-4xl sm:text-5xl text-cream mb-3"
-          >
-            What do you want to hear about?
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="body-text text-muted mb-10"
-          >
-            Pick at least 5 to start. You can follow more later.
-          </motion.p>
+          </p>
+          <h1 className="display-text text-4xl sm:text-5xl text-ink mb-3">
+            what do you want to hear about?
+          </h1>
+          <p className="body-text text-muted mb-10">
+            pick at least 5 topics. whispers from insiders on each will land in your feed.
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-wrap gap-2"
-          >
-            {featured.map((topic) => {
-              const isSelected = selected.includes(topic.id);
-              return (
-                <button
-                  key={topic.id}
-                  type="button"
-                  data-selected={isSelected}
-                  onClick={() => toggle(topic.id)}
-                  className="topic-chip"
-                >
-                  {topic.emoji && <span>{topic.emoji}</span>}
-                  <span>{topic.name}</span>
-                </button>
-              );
-            })}
-          </motion.div>
-
-          <div className="mt-16 flex items-center justify-between">
-            <span className="mono-text text-sm text-muted">
-              {selected.length} / 5 selected
-            </span>
-            <button
-              type="button"
-              onClick={proceed}
-              disabled={selected.length < 5}
-              className="btn-primary"
-            >
-              Continue
-              <span>→</span>
-            </button>
-          </div>
+          <OnboardingTopicPicker
+            topics={featured.map((t) => ({ id: t.id, name: t.name, emoji: t.emoji ?? null }))}
+          />
         </div>
       </section>
     </main>

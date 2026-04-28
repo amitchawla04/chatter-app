@@ -1,7 +1,11 @@
 import type { Config } from "tailwindcss";
 
-// Chatter brand tokens — locked from Design Brief v1
-// These match what Claude Design generates from the Section 1 prompt
+// Chatter brand tokens · v2 LIGHT ENTERTAINMENT REGISTER (locked 2026-04-25)
+// Pivoted from dark "warm editorial" to light entertainment per founder
+// direction + research: every entertainment-social app (IG/TikTok/Threads/
+// BeReal/Pinterest/Partiful/Letterboxd/Substack) defaults to white/warm-white.
+// Dark-mode defaults are for *consumption* apps (Netflix/Spotify), not posting.
+
 const config: Config = {
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,16 +14,26 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // primary palette
-        ink: "#0a0a0a",
-        cream: "#f5f1e8",
-        gold: "#c9a84c",
-        muted: "#6b6b6b",
-        line: "#2a2724",
-        whisper: "#1a1a1a",
-        // state colors (used sparingly)
-        success: "#7fb069",
-        warn: "#d98841",
+        // Surface palette — warm white, not cold
+        canvas: "#FAF9F6",     // warm-white bg (Letterboxd/Substack register)
+        paper: "#FFFFFF",      // pure-white for cards + sheets to lift off canvas
+        ink: "#0A0A0A",        // near-black for text
+        "ink-soft": "#1F1F1F", // secondary text strong
+        muted: "#767676",      // tertiary text — readable on warm-white
+        "muted-soft": "#A8A4A0", // quaternary / hints
+        line: "#E8E4DC",       // warm hairline
+        "line-soft": "#F0EDE6",// lighter hairline / dividers
+        tint: "#F5F2EA",       // card-tint on canvas (feed bg variation)
+
+        // Accent palette
+        red: "#FF2D2D",        // PRIMARY — period, CTAs, LIVE states
+        "red-soft": "#FFE8E8", // red bg tint
+        blue: "#2D5BFF",       // scope / village / trust
+        "blue-soft": "#E8EEFF",
+        gold: "#C9A84C",       // CREDENTIAL only — insider tags, vouches
+        "gold-soft": "#FAF3E0",
+        green: "#3E8F3E",      // success
+        warn: "#C35D2E",       // warn / error
       },
       fontFamily: {
         display: ["var(--font-display)", "Cormorant Garamond", "Georgia", "serif"],

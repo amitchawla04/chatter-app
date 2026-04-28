@@ -1,0 +1,19 @@
+{
+  "name": "Chatter",
+  "short_name": "Chatter",
+  "description": "Whispers from people who actually know. Layer 1.5 of social — between public broadcasting and private messaging.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF9F6",
+  "theme_color": "#FAF9F6",
+  "categories": ["social", "communication", "lifestyle"],
+  "icons": [
+    {
+      "src": "/apple-icon",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
