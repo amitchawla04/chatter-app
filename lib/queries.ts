@@ -211,6 +211,7 @@ export type ThreadSummary = {
   participant_count: number;
   last_message_at: string;
   is_creator: boolean;
+  unread_count: number;
 };
 
 export async function fetchMyThreads(): Promise<ThreadSummary[]> {
@@ -224,7 +225,7 @@ export async function fetchMyThreads(): Promise<ThreadSummary[]> {
   const { data: rows } = await admin
     .from("village_thread_participants")
     .select(`
-      thread_id,
+      thread_id, last_read_at,
       village_threads:thread_id (
         id, name, topic_id, last_message_at, creator_id, is_archived,
         topics:topic_id ( name, emoji )
@@ -234,6 +235,7 @@ export async function fetchMyThreads(): Promise<ThreadSummary[]> {
 
   type Row = {
     thread_id: string;
+    last_read_at: string;
     village_threads: {
       id: string;
       name: string;
@@ -246,23 +248,39 @@ export async function fetchMyThreads(): Promise<ThreadSummary[]> {
   };
 
   const threadIds: string[] = [];
+  const lastReadByThread = new Map<string, string>();
   const threads = ((rows ?? []) as unknown as Row[])
     .filter((r) => r.village_threads && !r.village_threads.is_archived)
     .map((r) => {
       threadIds.push(r.thread_id);
+      lastReadByThread.set(r.thread_id, r.last_read_at);
       return r;
     });
 
-  // Get participant counts in one query
+  // Participant counts + unread counts in parallel
   const counts = new Map<string, number>();
+  const unreads = new Map<string, number>();
   if (threadIds.length > 0) {
-    const { data: parts } = await admin
-      .from("village_thread_participants")
-      .select("thread_id")
-      .in("thread_id", threadIds);
+    const [{ data: parts }, ...unreadResults] = await Promise.all([
+      admin
+        .from("village_thread_participants")
+        .select("thread_id")
+        .in("thread_id", threadIds),
+      ...threadIds.map((id) =>
+        admin
+          .from("whispers")
+          .select("id", { count: "exact", head: true })
+          .eq("thread_id", id)
+          .neq("author_id", user.id)
+          .gt("created_at", lastReadByThread.get(id) ?? new Date(0).toISOString()),
+      ),
+    ]);
     for (const p of parts ?? []) {
       counts.set(p.thread_id, (counts.get(p.thread_id) ?? 0) + 1);
     }
+    threadIds.forEach((id, i) => {
+      unreads.set(id, unreadResults[i].count ?? 0);
+    });
   }
 
   return threads
@@ -275,6 +293,7 @@ export async function fetchMyThreads(): Promise<ThreadSummary[]> {
       participant_count: counts.get(r.village_threads!.id) ?? 1,
       last_message_at: r.village_threads!.last_message_at,
       is_creator: r.village_threads!.creator_id === user.id,
+      unread_count: unreads.get(r.village_threads!.id) ?? 0,
     }))
     .sort((a, b) => b.last_message_at.localeCompare(a.last_message_at));
 }
@@ -286,6 +305,11 @@ export type ThreadDetail = {
   topic_name: string;
   topic_emoji: string | null;
   creator_id: string;
+  pinned_message: {
+    id: string;
+    content_text: string;
+    author_handle: string;
+  } | null;
   participants: { user_id: string; handle: string; is_charter: boolean; role: string }[];
   messages: {
     id: string;
@@ -318,7 +342,7 @@ export async function fetchThreadDetail(threadId: string): Promise<ThreadDetail 
   const { data: thread } = await admin
     .from("village_threads")
     .select(`
-      id, name, topic_id, creator_id,
+      id, name, topic_id, creator_id, pinned_message_id,
       topics:topic_id ( name, emoji )
     `)
     .eq("id", threadId)
@@ -330,8 +354,36 @@ export async function fetchThreadDetail(threadId: string): Promise<ThreadDetail 
     name: string;
     topic_id: string;
     creator_id: string;
+    pinned_message_id: string | null;
     topics: { name: string; emoji: string | null } | null;
   };
+
+  // Pinned message (if any)
+  let pinned_message: ThreadDetail["pinned_message"] = null;
+  if (t.pinned_message_id) {
+    const { data: pin } = await admin
+      .from("whispers")
+      .select(`
+        id, content_text,
+        users:author_id ( handle )
+      `)
+      .eq("id", t.pinned_message_id)
+      .maybeSingle();
+    if (pin) {
+      const p = pin as unknown as {
+        id: string;
+        content_text: string | null;
+        users: { handle: string } | null;
+      };
+      if (p.content_text && p.users) {
+        pinned_message = {
+          id: p.id,
+          content_text: p.content_text,
+          author_handle: p.users.handle,
+        };
+      }
+    }
+  }
 
   const { data: partsRaw } = await admin
     .from("village_thread_participants")
@@ -391,6 +443,7 @@ export async function fetchThreadDetail(threadId: string): Promise<ThreadDetail 
     topic_name: t.topics?.name ?? "",
     topic_emoji: t.topics?.emoji ?? null,
     creator_id: t.creator_id,
+    pinned_message,
     participants,
     messages,
   };

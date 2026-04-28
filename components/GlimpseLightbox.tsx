@@ -2,13 +2,21 @@
 
 /**
  * GlimpseLightbox — full-screen modal for a single glimpse.
- * Swipe / arrow-key / tap-edges to navigate. Escape to close.
- * No view-count emission (Pact 5).
+ *
+ * Polish (vs IG Stories at its own game):
+ *  - Auto-advance every 5s with top progress bars (IG-style segmentation)
+ *  - Tap-and-hold pauses (release resumes)
+ *  - Tap left third → previous, right two-thirds → next (IG convention)
+ *  - Arrow keys + Escape still work for desktop
+ *  - On final glimpse, last 5s closes the lightbox
+ *  - prefers-reduced-motion: progress bars + auto-advance disabled
+ *
+ * Pact: still no view-count emission. No "X seen by Y" indicators.
  */
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X } from "lucide-react";
 import { CharterBadge } from "./CharterBadge";
 import { relativeTime } from "@/lib/whisper";
 import type { GlimpseRow } from "@/lib/queries";
@@ -19,21 +27,71 @@ interface GlimpseLightboxProps {
   onClose: () => void;
 }
 
+const ADVANCE_MS = 5000;
+
 export function GlimpseLightbox({
   glimpses,
   startIndex,
   onClose,
 }: GlimpseLightboxProps) {
   const [index, setIndex] = useState(startIndex);
+  const [progress, setProgress] = useState(0); // 0..1 of current glimpse elapsed
+  const [paused, setPaused] = useState(false);
+  const startRef = useRef<number>(Date.now());
+  const elapsedAtPauseRef = useRef<number>(0);
+  const reducedMotionRef = useRef<boolean>(false);
   const current = glimpses[index];
 
   const next = useCallback(() => {
-    setIndex((i) => Math.min(i + 1, glimpses.length - 1));
-  }, [glimpses.length]);
+    setIndex((i) => {
+      if (i + 1 >= glimpses.length) {
+        // Last glimpse → close
+        onClose();
+        return i;
+      }
+      return i + 1;
+    });
+  }, [glimpses.length, onClose]);
+
   const prev = useCallback(() => {
     setIndex((i) => Math.max(i - 1, 0));
   }, []);
 
+  // Reset progress when index changes
+  useEffect(() => {
+    startRef.current = Date.now();
+    elapsedAtPauseRef.current = 0;
+    setProgress(0);
+  }, [index]);
+
+  // Detect prefers-reduced-motion once
+  useEffect(() => {
+    reducedMotionRef.current =
+      typeof window !== "undefined" &&
+      Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+  }, []);
+
+  // Progress + auto-advance loop
+  useEffect(() => {
+    if (reducedMotionRef.current) return; // no auto-advance for reduced-motion users
+    if (paused) return;
+
+    let raf: number;
+    const tick = () => {
+      const elapsed = elapsedAtPauseRef.current + (Date.now() - startRef.current);
+      const ratio = Math.min(elapsed / ADVANCE_MS, 1);
+      setProgress(ratio);
+      if (ratio >= 1) {
+        next();
+      } else {
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [index, paused, next]);
+
+  // Keyboard nav
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -48,6 +106,25 @@ export function GlimpseLightbox({
     };
   }, [onClose, next, prev]);
 
+  // Tap-and-hold to pause
+  const onPointerDown = () => {
+    elapsedAtPauseRef.current += Date.now() - startRef.current;
+    setPaused(true);
+  };
+  const onPointerUp = () => {
+    if (!paused) return;
+    startRef.current = Date.now();
+    setPaused(false);
+  };
+
+  // Tap-edge navigation (left third = prev, right two-thirds = next)
+  const onTap = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    if (x < rect.width / 3) prev();
+    else next();
+  };
+
   if (!current) return null;
 
   return (
@@ -58,13 +135,40 @@ export function GlimpseLightbox({
       className="fixed inset-0 z-[100] bg-ink/95 backdrop-blur-sm flex flex-col"
       onClick={onClose}
     >
-      <div className="flex items-center justify-between px-5 py-4 text-paper">
+      {/* Top segmented progress bars — IG-stories-style, one segment per glimpse */}
+      <div
+        className="flex items-center gap-1 px-4 pt-3"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {glimpses.map((_, i) => (
+          <div
+            key={i}
+            className="flex-1 h-[2px] bg-paper/20 overflow-hidden rounded-full"
+          >
+            <div
+              className="h-full bg-paper origin-left transition-transform"
+              style={{
+                transform: `scaleX(${
+                  i < index ? 1 : i === index ? progress : 0
+                })`,
+                transitionDuration: paused ? "0ms" : "60ms",
+              }}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between px-5 py-3 text-paper">
         <div className="mono-text text-[10px] uppercase tracking-wider opacity-80">
           {index + 1} / {glimpses.length}
+          {paused && <span className="ml-2 text-gold">paused</span>}
         </div>
         <button
           type="button"
-          onClick={onClose}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
           className="w-9 h-9 rounded-full bg-paper/10 hover:bg-paper/20 flex items-center justify-center transition"
           aria-label="Close"
         >
@@ -73,35 +177,23 @@ export function GlimpseLightbox({
       </div>
 
       <div
-        className="flex-1 flex items-center justify-center px-5 relative"
-        onClick={(e) => e.stopPropagation()}
+        className="flex-1 flex items-center justify-center px-5 relative select-none"
+        onClick={(e) => {
+          e.stopPropagation();
+          onTap(e);
+        }}
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onPointerLeave={onPointerUp}
       >
-        {index > 0 && (
-          <button
-            type="button"
-            onClick={prev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-paper/10 hover:bg-paper/20 text-paper flex items-center justify-center transition"
-            aria-label="Previous glimpse"
-          >
-            <ChevronLeft size={20} strokeWidth={1.6} />
-          </button>
-        )}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={current.media_url}
           alt={`Glimpse from @${current.author_handle} in ${current.topic_name}`}
-          className="max-w-full max-h-[70vh] object-contain"
+          className="max-w-full max-h-[70vh] object-contain pointer-events-none"
+          draggable={false}
         />
-        {index < glimpses.length - 1 && (
-          <button
-            type="button"
-            onClick={next}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-paper/10 hover:bg-paper/20 text-paper flex items-center justify-center transition"
-            aria-label="Next glimpse"
-          >
-            <ChevronRight size={20} strokeWidth={1.6} />
-          </button>
-        )}
       </div>
 
       <div

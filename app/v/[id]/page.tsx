@@ -10,7 +10,8 @@ import { ThreadComposer } from "@/components/ThreadComposer";
 import { CharterBadge } from "@/components/CharterBadge";
 import { fetchThreadDetail, fetchCurrentUserRow } from "@/lib/queries";
 import { relativeTime } from "@/lib/whisper";
-import { leaveThread } from "@/lib/thread-actions";
+import { leaveThread, markThreadRead } from "@/lib/thread-actions";
+import { ThreadCreatorTools } from "@/components/ThreadCreatorTools";
 
 export const revalidate = 0;
 
@@ -25,6 +26,9 @@ export default async function ThreadDetailPage({
 
   const detail = await fetchThreadDetail(id);
   if (!detail) notFound();
+
+  // Mark this thread as read on view (fire-and-forget)
+  markThreadRead(id).catch(() => {});
 
   const isCreator = detail.creator_id === me.id;
 
@@ -82,10 +86,40 @@ export default async function ThreadDetailPage({
             >
               @{p.handle}
               {p.is_charter && <CharterBadge size="sm" />}
+              {isCreator && p.user_id !== me.id && (
+                <ThreadCreatorTools
+                  threadId={id}
+                  memberUserId={p.user_id}
+                  memberHandle={p.handle}
+                  variant="kick"
+                />
+              )}
             </li>
           ))}
         </ul>
       </section>
+
+      {/* Pinned message strip — creator-pinned context */}
+      {detail.pinned_message && (
+        <section className="px-5 py-3 border-b border-line bg-gold/10">
+          <p className="mono-text text-[10px] uppercase tracking-wider text-gold mb-1">
+            📌 pinned by creator
+          </p>
+          <p className="body-text text-sm text-ink leading-snug">
+            {detail.pinned_message.content_text}
+          </p>
+          <p className="mono-text text-[10px] text-muted mt-1">
+            @{detail.pinned_message.author_handle}
+            {isCreator && (
+              <ThreadCreatorTools
+                threadId={id}
+                messageId={null}
+                variant="unpin"
+              />
+            )}
+          </p>
+        </section>
+      )}
 
       <section className="px-5 py-4">
         {detail.messages.length === 0 ? (
@@ -102,7 +136,7 @@ export default async function ThreadDetailPage({
                 }`}
               >
                 <div
-                  className={`px-3 py-2 ${
+                  className={`px-3 py-2 group relative ${
                     m.is_self
                       ? "bg-red text-paper"
                       : "bg-paper border border-line text-ink"
@@ -111,6 +145,13 @@ export default async function ThreadDetailPage({
                   <p className="body-text text-sm leading-snug whitespace-pre-wrap">
                     {m.content_text}
                   </p>
+                  {isCreator && detail.pinned_message?.id !== m.id && (
+                    <ThreadCreatorTools
+                      threadId={id}
+                      messageId={m.id}
+                      variant="pin"
+                    />
+                  )}
                 </div>
                 <p
                   className={`mono-text text-[10px] text-muted mt-1 ${

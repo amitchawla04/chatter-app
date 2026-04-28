@@ -66,10 +66,15 @@ export default async function VillageThreadsIndex() {
                         {t.topic_emoji && (
                           <span className="text-base">{t.topic_emoji}</span>
                         )}
-                        <h3 className="text-ink font-medium truncate">{t.name}</h3>
+                        <h3 className={`text-ink truncate ${t.unread_count > 0 ? "font-semibold" : "font-medium"}`}>{t.name}</h3>
                         {t.is_creator && (
                           <span className="mono-text text-[9px] uppercase tracking-wider text-gold">
                             creator
+                          </span>
+                        )}
+                        {t.unread_count > 0 && (
+                          <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full bg-red text-paper text-[10px] mono-text font-medium">
+                            {t.unread_count}
                           </span>
                         )}
                       </div>

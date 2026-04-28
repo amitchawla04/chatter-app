@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRate } from "@/lib/rate-limit";
+import { notifyUser } from "@/lib/push";
 
 /**
  * Submit an insider correction to a whisper.
@@ -69,6 +70,21 @@ export async function submitCorrection(params: {
       return { ok: false, error: "you already pushed back on this whisper" };
     }
     return { ok: false, error: error.message };
+  }
+
+  // Notify the original whisper author
+  if (whisper) {
+    const { data: me } = await admin
+      .from("users")
+      .select("handle, insider_tags")
+      .eq("id", user.id)
+      .maybeSingle();
+    notifyUser((whisper as { author_id: string }).author_id, {
+      kind: "correction.posted",
+      title: `@${me?.handle ?? "an insider"} pushed back on your whisper`,
+      body: content.slice(0, 100),
+      url: `/w/${params.whisperId}`,
+    }).catch(() => {});
   }
 
   revalidatePath(`/w/${params.whisperId}`);

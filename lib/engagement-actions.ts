@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRate } from "@/lib/rate-limit";
+import { notifyUser } from "@/lib/push";
 
 async function getAuthUser() {
   const supabase = await createServerClient();
@@ -132,7 +133,7 @@ export async function passWhisper(params: {
   // Bump pass_count denormalized counter
   const { data: cur } = await admin
     .from("whispers")
-    .select("pass_count")
+    .select("pass_count, content_text")
     .eq("id", params.whisperId)
     .maybeSingle();
   if (cur) {
@@ -141,6 +142,19 @@ export async function passWhisper(params: {
       .update({ pass_count: (cur.pass_count ?? 0) + 1 })
       .eq("id", params.whisperId);
   }
+
+  // Push notify recipient — Pact-permitted (passes, not engagement metrics)
+  const { data: from } = await admin
+    .from("users")
+    .select("handle")
+    .eq("id", user.id)
+    .maybeSingle();
+  notifyUser(params.toUserId, {
+    kind: "pass.received",
+    title: "@" + (from?.handle ?? "someone") + " passed you a whisper",
+    body: params.note ? `note: "${params.note.slice(0, 80)}"` : (cur?.content_text?.slice(0, 100) ?? "open it"),
+    url: "/passes",
+  }).catch(() => {});
 
   revalidatePath("/passes");
   revalidatePath("/home");

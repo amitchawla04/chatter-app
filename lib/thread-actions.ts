@@ -12,6 +12,7 @@ import { revalidatePath } from "next/cache";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRate } from "@/lib/rate-limit";
+import { notifyUser } from "@/lib/push";
 
 export async function createThread(params: {
   name: string;
@@ -69,6 +70,20 @@ export async function createThread(params: {
       .map((u) => ({ thread_id: thread.id, user_id: u.id, role: "member" as const }));
     if (rows.length > 0) {
       await admin.from("village_thread_participants").insert(rows);
+      // Notify each invitee
+      const { data: creator } = await admin
+        .from("users")
+        .select("handle")
+        .eq("id", user.id)
+        .maybeSingle();
+      for (const r of rows) {
+        notifyUser(r.user_id, {
+          kind: "thread.invited",
+          title: `@${creator?.handle ?? "someone"} added you to "${name}"`,
+          body: "tap to join the village thread.",
+          url: `/v/${thread.id}`,
+        }).catch(() => {});
+      }
     }
   }
 
@@ -163,6 +178,18 @@ export async function inviteToThread(params: { threadId: string; handle: string 
     .insert({ thread_id: params.threadId, user_id: target.id, role: "member" });
   if (error) return { ok: false, error: error.message };
 
+  // Push notify
+  const [{ data: thread }, { data: inviter }] = await Promise.all([
+    admin.from("village_threads").select("name").eq("id", params.threadId).maybeSingle(),
+    admin.from("users").select("handle").eq("id", user.id).maybeSingle(),
+  ]);
+  notifyUser(target.id, {
+    kind: "thread.invited",
+    title: `@${inviter?.handle ?? "someone"} added you to "${thread?.name ?? "a thread"}"`,
+    body: "tap to join the village thread.",
+    url: `/v/${params.threadId}`,
+  }).catch(() => {});
+
   revalidatePath(`/v/${params.threadId}`);
   return { ok: true };
 }
@@ -191,5 +218,87 @@ export async function leaveThread(threadId: string) {
   }
 
   revalidatePath("/v");
+  return { ok: true };
+}
+
+/** Creator-only: remove a member from the thread. */
+export async function removeThreadMember(params: {
+  threadId: string;
+  memberUserId: string;
+}) {
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "sign-in required" };
+
+  const admin = createAdminClient();
+  const { data: thread } = await admin
+    .from("village_threads")
+    .select("creator_id")
+    .eq("id", params.threadId)
+    .maybeSingle();
+  if (!thread || (thread as { creator_id: string }).creator_id !== user.id) {
+    return { ok: false, error: "creator-only" };
+  }
+  if (params.memberUserId === user.id) {
+    return { ok: false, error: "use 'leave' instead" };
+  }
+
+  await admin
+    .from("village_thread_participants")
+    .delete()
+    .eq("thread_id", params.threadId)
+    .eq("user_id", params.memberUserId);
+
+  revalidatePath(`/v/${params.threadId}`);
+  return { ok: true };
+}
+
+/** Creator-only: pin a message in the thread. Pass null to unpin. */
+export async function pinThreadMessage(params: {
+  threadId: string;
+  messageId: string | null;
+}) {
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "sign-in required" };
+
+  const admin = createAdminClient();
+  const { data: thread } = await admin
+    .from("village_threads")
+    .select("creator_id")
+    .eq("id", params.threadId)
+    .maybeSingle();
+  if (!thread || (thread as { creator_id: string }).creator_id !== user.id) {
+    return { ok: false, error: "creator-only" };
+  }
+
+  await admin
+    .from("village_threads")
+    .update({ pinned_message_id: params.messageId })
+    .eq("id", params.threadId);
+
+  revalidatePath(`/v/${params.threadId}`);
+  return { ok: true };
+}
+
+/** Mark this user's last_read_at on a thread. */
+export async function markThreadRead(threadId: string) {
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false };
+
+  const admin = createAdminClient();
+  await admin
+    .from("village_thread_participants")
+    .update({ last_read_at: new Date().toISOString() })
+    .eq("thread_id", threadId)
+    .eq("user_id", user.id);
+
   return { ok: true };
 }
