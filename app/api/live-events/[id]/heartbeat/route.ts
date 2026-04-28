@@ -7,10 +7,13 @@ import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(
-  _: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id: eventId } = await params;
+  const url = new URL(req.url);
+  const op = url.searchParams.get("op");
+
   const supabase = await createServerClient();
   const {
     data: { user },
@@ -18,6 +21,17 @@ export async function POST(
   if (!user) return NextResponse.json({ ok: false, error: "auth" }, { status: 401 });
 
   const admin = createAdminClient();
+
+  // sendBeacon-friendly leave path — beacons can only POST, so we accept ?op=leave
+  if (op === "leave") {
+    await admin
+      .from("live_event_viewers")
+      .delete()
+      .eq("event_id", eventId)
+      .eq("user_id", user.id);
+    return NextResponse.json({ ok: true, op: "leave" });
+  }
+
   await admin
     .from("live_event_viewers")
     .upsert(

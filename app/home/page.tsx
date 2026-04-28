@@ -15,12 +15,14 @@ import { WhisperCard } from "@/components/WhisperCard";
 import { HomeFilter } from "@/components/HomeFilter";
 import { TopicRail, type TopicRailItem } from "@/components/TopicRail";
 import { GlimpseStrip } from "@/components/GlimpseStrip";
+import { OpeningMoment } from "@/components/OpeningMoment";
 import {
   fetchPublicWhispers,
   fetchCurrentUserRow,
   fetchEchoedIds,
   fetchSavedIds,
   fetchGlimpseImages,
+  fetchCorrectionPreviews,
 } from "@/lib/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
@@ -42,7 +44,11 @@ export default async function HomePage({
   ]);
 
   const ids = whispers.map((w) => w.id);
-  const [echoed, saved] = await Promise.all([fetchEchoedIds(ids), fetchSavedIds(ids)]);
+  const [echoed, saved, corrections] = await Promise.all([
+    fetchEchoedIds(ids),
+    fetchSavedIds(ids),
+    fetchCorrectionPreviews(ids),
+  ]);
 
   const visible =
     filter === "whispers" ? whispers.filter((w) => w.is_whisper_tier) : whispers;
@@ -53,8 +59,17 @@ export default async function HomePage({
   // Build topic rail — user's tuned topics if authed, popular topics from feed if not
   const railTopics = await buildTopicRail(currentUser?.id, whispers);
 
+  // Pick the freshest charter whisper as the proof-whisper for the opening moment
+  const proof = whispers.find((w) => w.author.is_charter && w.content_text) ?? whispers[0];
+
   return (
     <main className="min-h-screen pb-28">
+      <OpeningMoment
+        proofText={proof?.content_text ?? null}
+        proofAuthor={proof?.author.handle ?? null}
+        proofTopic={proof?.topic.name ?? null}
+        proofIsCharter={proof?.author.is_charter ?? false}
+      />
       {/* Header */}
       <header className="sticky top-0 z-40 bg-canvas/95 backdrop-blur border-b border-line px-5 py-4 flex items-center justify-between">
         <ChatterMark size="sm" pulse="breath" />
@@ -120,6 +135,7 @@ export default async function HomePage({
                 initiallyEchoed={echoed.has(w.id)}
                 initiallySaved={saved.has(w.id)}
                 isAuthed={isAuthed}
+                correction={corrections.get(w.id) ?? null}
               />
             );
           })

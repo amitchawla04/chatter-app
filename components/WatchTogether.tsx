@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { useT } from "./I18nProvider";
 
 type Viewer = {
   user_id: string;
@@ -26,6 +27,7 @@ interface WatchTogetherProps {
 export function WatchTogether({ eventId, isAuthed }: WatchTogetherProps) {
   const [viewers, setViewers] = useState<Viewer[]>([]);
   const [count, setCount] = useState(0);
+  const t = useT();
 
   useEffect(() => {
     if (!isAuthed) return;
@@ -56,12 +58,20 @@ export function WatchTogether({ eventId, isAuthed }: WatchTogetherProps) {
     };
     document.addEventListener("visibilitychange", onVisibility);
 
+    // Exit beacon — fires on tab close / navigation, more reliable than fetch DELETE on unmount
+    const onUnload = () => {
+      navigator.sendBeacon?.(`/api/live-events/${eventId}/heartbeat?op=leave`);
+    };
+    window.addEventListener("pagehide", onUnload);
+    window.addEventListener("beforeunload", onUnload);
+
     return () => {
       stopped = true;
       clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisibility);
-      // Best-effort exit ping
-      navigator.sendBeacon?.(`/api/live-events/${eventId}/heartbeat`);
+      window.removeEventListener("pagehide", onUnload);
+      window.removeEventListener("beforeunload", onUnload);
+      onUnload();
       fetch(`/api/live-events/${eventId}/heartbeat`, { method: "DELETE" }).catch(
         () => {},
       );
@@ -80,8 +90,8 @@ export function WatchTogether({ eventId, isAuthed }: WatchTogetherProps) {
         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red" />
       </span>
       <p className="mono-text text-[11px] text-ink">
-        watching together · <span className="text-red">{count}</span>{" "}
-        {count === 1 ? "viewer" : "viewers"}
+        {t("live.watching_together")} · <span className="text-red">{count}</span>{" "}
+        {count === 1 ? t("common.viewer_singular") : t("common.viewer_plural")}
         {others.length > 0 && (
           <>
             {" · "}

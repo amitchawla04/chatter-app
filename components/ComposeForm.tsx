@@ -185,25 +185,76 @@ export function ComposeForm({ topics, initialTopicId }: Props) {
           )}
         </div>
 
-        {/* Composer body */}
+        {/* Composer body — scope-aware canvas
+            Width, border, hue, and placeholder all shift with the chosen scope so
+            the surface itself teaches: a village whisper feels intimate (narrow,
+            blue-bordered, soft); an open whisper feels broadcast (full-width, red,
+            louder placeholder). Pact 5: scope is a felt decision, not just a chip. */}
         {(modality === "text" || modality === "breath") && (
-          <div>
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value.slice(0, charLimit))}
-              placeholder={isBreath ? "a 60-char breath for your village…" : "what's the whisper?"}
-              className="w-full bg-transparent text-ink placeholder-muted-soft resize-none focus:outline-none display-italic text-2xl min-h-[200px]"
-              autoFocus
-              maxLength={charLimit}
-            />
-            <div className="flex justify-end">
-              <span
-                className={`mono-text text-xs ${
-                  remaining < 20 ? "text-warn" : "text-muted"
+          <div className="flex justify-center">
+            <div
+              className={`transition-all duration-500 ease-out border-l-2 pl-5 py-3 ${
+                isBreath
+                  ? "max-w-md w-full border-blue bg-blue/5"
+                  : effectiveScope === "circle"
+                    ? "max-w-md w-full border-blue bg-blue/5"
+                    : effectiveScope === "network"
+                      ? "max-w-xl w-full border-blue/60"
+                      : effectiveScope === "private"
+                        ? "max-w-sm w-full border-ink bg-ink/[0.03]"
+                        : "max-w-2xl w-full border-red"
+              }`}
+            >
+              <div className="mono-text text-[10px] uppercase tracking-[0.2em] text-muted mb-3">
+                {isBreath
+                  ? "breath · 60 chars · your village · 24h"
+                  : effectiveScope === "circle"
+                    ? "to your village · the people who hear you first"
+                    : effectiveScope === "network"
+                      ? "to your network · vouched insiders only"
+                      : effectiveScope === "private"
+                        ? "to one person · view-once · a sealed envelope"
+                        : "to the open · every tuned-in topic listener"}
+              </div>
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value.slice(0, charLimit))}
+                placeholder={
+                  isBreath
+                    ? "a 60-char breath for your village…"
+                    : effectiveScope === "circle"
+                      ? "the village hears this first…"
+                      : effectiveScope === "network"
+                        ? "your insider network is listening…"
+                        : effectiveScope === "private"
+                          ? "a sealed envelope, opened once…"
+                          : "speak softly · facts only · the world is listening…"
+                }
+                className={`w-full bg-transparent text-ink placeholder-muted-soft resize-none focus:outline-none display-italic min-h-[180px] ${
+                  effectiveScope === "public" ? "text-2xl sm:text-3xl" : "text-xl sm:text-2xl"
                 }`}
-              >
-                {text.length} / {charLimit}
-              </span>
+                autoFocus
+                maxLength={charLimit}
+              />
+              <div className="flex items-center justify-between pt-2">
+                <span className="mono-text text-[10px] text-muted/70">
+                  {effectiveScope === "circle"
+                    ? "🏘️"
+                    : effectiveScope === "network"
+                      ? "🔗"
+                      : effectiveScope === "private"
+                        ? "🔒"
+                        : "🌍"}{" "}
+                  {effectiveScope}
+                </span>
+                <span
+                  className={`mono-text text-xs ${
+                    remaining < 20 ? "text-warn" : "text-muted"
+                  }`}
+                >
+                  {text.length} / {charLimit}
+                </span>
+              </div>
             </div>
           </div>
         )}

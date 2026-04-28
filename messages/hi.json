@@ -9,6 +9,7 @@
   "auth.sign_out": "साइन आउट",
   "home.live_strip": "अभी लाइव",
   "home.glimpse_today": "आज · झलक",
+  "home.glimpse_window": "24 घं",
   "home.empty": "अभी कोई फुसफुसाहट नहीं। पहले बनें।",
   "compose.placeholder": "धीरे बोलें · केवल तथ्य",
   "compose.scope.village": "गाँव",
@@ -16,12 +17,19 @@
   "compose.scope.public": "खुला",
   "compose.cta": "पोस्ट करें",
   "village.threads.title": "गाँव के थ्रेड",
+  "village.threads.body": "छोटी समूह बातचीत · प्रति थ्रेड अधिकतम 12 गाँववाले · एक विषय पर केंद्रित।",
   "village.threads.empty": "अभी कोई थ्रेड नहीं। 11 तक गाँववालों के साथ शुरू करें।",
   "village.threads.new": "नया थ्रेड",
   "village.threads.create": "थ्रेड बनाएँ",
   "village.threads.creating": "बना रहे हैं…",
+  "village.threads.leave": "छोड़ें",
+  "village.threads.no_messages": "अभी कोई संदेश नहीं · चुप्पी तोड़ें।",
+  "village.threads.composer_placeholder": "गाँव को संदेश भेजें…",
+  "village.threads.composer_note": "थ्रेड के लिए निजी · अधिकतम 12 गाँववाले · सार्वजनिक गिनती नहीं",
   "live.watching_together": "साथ देख रहे हैं",
   "common.charter": "संस्थापक",
   "common.private": "थ्रेड के लिए निजी",
-  "common.thread_cap": "अधिकतम 12 गाँववाले · सार्वजनिक गिनती नहीं"
+  "common.thread_cap": "अधिकतम 12 गाँववाले · सार्वजनिक गिनती नहीं",
+  "common.viewer_singular": "दर्शक",
+  "common.viewer_plural": "दर्शक"
 }

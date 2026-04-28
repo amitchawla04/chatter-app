@@ -9,6 +9,7 @@
   "auth.sign_out": "sair",
   "home.live_strip": "ao vivo",
   "home.glimpse_today": "hoje · vislumbre",
+  "home.glimpse_window": "24h",
   "home.empty": "Ainda não há sussurros. Seja o primeiro.",
   "compose.placeholder": "fale baixo · apenas fatos",
   "compose.scope.village": "vila",
@@ -16,12 +17,19 @@
   "compose.scope.public": "aberto",
   "compose.cta": "publicar",
   "village.threads.title": "tópicos da vila",
+  "village.threads.body": "pequenas conversas em grupo · máx 12 aldeões por tópico · focadas em um tema.",
   "village.threads.empty": "ainda não há tópicos. comece um com até 11 aldeões.",
   "village.threads.new": "novo tópico",
   "village.threads.create": "criar tópico",
   "village.threads.creating": "criando…",
+  "village.threads.leave": "sair",
+  "village.threads.no_messages": "ainda não há mensagens · quebre o silêncio.",
+  "village.threads.composer_placeholder": "envie uma mensagem para a vila…",
+  "village.threads.composer_note": "privado do tópico · máx 12 aldeões · sem contagem pública",
   "live.watching_together": "assistindo juntos",
   "common.charter": "fundador",
   "common.private": "privado do tópico",
-  "common.thread_cap": "máx 12 aldeões · sem contagem pública"
+  "common.thread_cap": "máx 12 aldeões · sem contagem pública",
+  "common.viewer_singular": "espectador",
+  "common.viewer_plural": "espectadores"
 }

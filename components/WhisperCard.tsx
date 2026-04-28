@@ -33,6 +33,12 @@ interface WhisperCardProps {
   initiallyEchoed?: boolean;
   initiallySaved?: boolean;
   isAuthed?: boolean;
+  correction?: {
+    count: number;
+    latest_text: string;
+    author_handle: string;
+    insider_tag: string | null;
+  } | null;
 }
 
 export function WhisperCard({
@@ -41,6 +47,7 @@ export function WhisperCard({
   initiallyEchoed = false,
   initiallySaved = false,
   isAuthed = false,
+  correction = null,
 }: WhisperCardProps) {
   const router = useRouter();
   const [echoed, setEchoed] = useState(initiallyEchoed);
@@ -198,11 +205,15 @@ export function WhisperCard({
           <ImageBlock url={(whisper as unknown as { content_media_url?: string | null }).content_media_url ?? null} />
         )}
 
-        {/* Pull-quote body with optional spoiler mask */}
+        {/* Pull-quote body with optional spoiler mask + correction-induced reset */}
         <div className="relative mb-4">
           <p
-            className={`display-italic text-xl sm:text-2xl text-ink leading-snug tracking-tighter transition ${
+            className={`display-italic text-xl sm:text-2xl leading-snug tracking-tighter transition ${
               obscured ? "blur-md select-none" : ""
+            } ${
+              correction
+                ? "text-muted line-through decoration-1 decoration-warn/60"
+                : "text-ink"
             }`}
           >
             &ldquo;{quoteText}&rdquo;
@@ -220,6 +231,30 @@ export function WhisperCard({
             </button>
           )}
         </div>
+
+        {/* Inline insider correction strip — Pact 5/11: truth visible in feed, not buried in detail */}
+        {correction && (
+          <Link
+            href={`/w/${whisper.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="block border-l-2 border-gold bg-gold/5 px-3 py-2 mb-4 hover:bg-gold/10 transition-colors"
+          >
+            <p className="mono-text text-[10px] uppercase tracking-wider text-red mb-1">
+              {correction.count > 1
+                ? `${correction.count} insiders pushed back`
+                : "an insider pushed back"}
+            </p>
+            <p className="body-text text-sm text-ink leading-snug line-clamp-2">
+              {correction.latest_text}
+            </p>
+            <p className="mono-text text-[10px] text-muted mt-1">
+              <span className="text-ink">@{correction.author_handle}</span>
+              {correction.insider_tag && (
+                <span className="text-gold italic"> · {correction.insider_tag}</span>
+              )}
+            </p>
+          </Link>
+        )}
 
         {/* Identity-merged byline — timestamp links to detail (permalink convention) */}
         <div className="mono-text text-xs text-muted mb-4 flex items-center gap-1.5 flex-wrap">

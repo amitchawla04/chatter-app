@@ -9,6 +9,7 @@
   "auth.sign_out": "sign out",
   "home.live_strip": "what's live",
   "home.glimpse_today": "today · glimpse",
+  "home.glimpse_window": "24h",
   "home.empty": "No whispers yet. Be the first.",
   "compose.placeholder": "speak softly · facts only",
   "compose.scope.village": "village",
@@ -16,12 +17,19 @@
   "compose.scope.public": "open",
   "compose.cta": "release",
   "village.threads.title": "village threads",
+  "village.threads.body": "small group conversations · max 12 villagers per thread · scoped to one topic.",
   "village.threads.empty": "no threads yet. start one with up to 11 villagers.",
   "village.threads.new": "new thread",
   "village.threads.create": "create thread",
   "village.threads.creating": "creating…",
+  "village.threads.leave": "leave",
+  "village.threads.no_messages": "no messages yet · break the silence.",
+  "village.threads.composer_placeholder": "message the village…",
+  "village.threads.composer_note": "private to thread · max 12 villagers · no public counts surfaced",
   "live.watching_together": "watching together",
   "common.charter": "charter",
   "common.private": "private to thread",
-  "common.thread_cap": "max 12 villagers · no public counts surfaced"
+  "common.thread_cap": "max 12 villagers · no public counts surfaced",
+  "common.viewer_singular": "viewer",
+  "common.viewer_plural": "viewers"
 }

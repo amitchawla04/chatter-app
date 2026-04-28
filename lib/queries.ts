@@ -396,6 +396,60 @@ export async function fetchThreadDetail(threadId: string): Promise<ThreadDetail 
   };
 }
 
+export type CorrectionPreview = {
+  count: number;
+  latest_text: string;
+  author_handle: string;
+  insider_tag: string | null;
+};
+
+/**
+ * Given a set of whisper IDs, return a map of correction previews per whisper.
+ * Used by feed cards to render inline insider-correction strips (Pact 11-13:
+ * truth visible, AI/insiders disclosed).
+ */
+export async function fetchCorrectionPreviews(
+  whisperIds: string[],
+): Promise<Map<string, CorrectionPreview>> {
+  if (whisperIds.length === 0) return new Map();
+
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("corrections")
+    .select(`
+      whisper_id, content, created_at,
+      users:author_id ( handle, insider_tags )
+    `)
+    .in("whisper_id", whisperIds)
+    .order("created_at", { ascending: false });
+
+  type Row = {
+    whisper_id: string;
+    content: string;
+    created_at: string;
+    users: { handle: string; insider_tags: string[] | null } | null;
+  };
+
+  const out = new Map<string, CorrectionPreview>();
+  for (const r of (data ?? []) as unknown as Row[]) {
+    const existing = out.get(r.whisper_id);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      out.set(r.whisper_id, {
+        count: 1,
+        latest_text: r.content,
+        author_handle: r.users?.handle ?? "?",
+        insider_tag:
+          r.users?.insider_tags && r.users.insider_tags.length > 0
+            ? r.users.insider_tags[0].replace(/_/g, " ")
+            : null,
+      });
+    }
+  }
+  return out;
+}
+
 /**
  * Given a set of whisper IDs, return the subset the current user has saved.
  */

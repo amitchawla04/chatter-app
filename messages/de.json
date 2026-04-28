@@ -9,6 +9,7 @@
   "auth.sign_out": "abmelden",
   "home.live_strip": "live jetzt",
   "home.glimpse_today": "heute · einblick",
+  "home.glimpse_window": "24Std",
   "home.empty": "Noch keine Flüstern. Sei der Erste.",
   "compose.placeholder": "leise sprechen · nur Fakten",
   "compose.scope.village": "dorf",
@@ -16,12 +17,19 @@
   "compose.scope.public": "offen",
   "compose.cta": "veröffentlichen",
   "village.threads.title": "dorf-threads",
+  "village.threads.body": "kleine gruppengespräche · max 12 dorfbewohner pro thread · zu einem thema.",
   "village.threads.empty": "noch keine threads. starte einen mit bis zu 11 dorfbewohnern.",
   "village.threads.new": "neuer thread",
   "village.threads.create": "thread erstellen",
   "village.threads.creating": "erstelle…",
+  "village.threads.leave": "verlassen",
+  "village.threads.no_messages": "noch keine nachrichten · brich die stille.",
+  "village.threads.composer_placeholder": "nachricht ans dorf…",
+  "village.threads.composer_note": "privat im thread · max 12 dorfbewohner · keine öffentlichen zähler",
   "live.watching_together": "gemeinsam zuschauen",
   "common.charter": "gründungsmitglied",
   "common.private": "privat im thread",
-  "common.thread_cap": "max 12 dorfbewohner · keine öffentlichen zähler"
+  "common.thread_cap": "max 12 dorfbewohner · keine öffentlichen zähler",
+  "common.viewer_singular": "zuschauer",
+  "common.viewer_plural": "zuschauer"
 }

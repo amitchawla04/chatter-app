@@ -9,6 +9,7 @@
   "auth.sign_out": "se déconnecter",
   "home.live_strip": "en direct",
   "home.glimpse_today": "aujourd'hui · aperçu",
+  "home.glimpse_window": "24h",
   "home.empty": "Pas encore de murmures. Soyez le premier.",
   "compose.placeholder": "parlez doucement · que des faits",
   "compose.scope.village": "village",
@@ -16,12 +17,19 @@
   "compose.scope.public": "ouvert",
   "compose.cta": "publier",
   "village.threads.title": "fils du village",
+  "village.threads.body": "petites conversations de groupe · max 12 villageois par fil · centrées sur un sujet.",
   "village.threads.empty": "pas encore de fils. commencez avec 11 villageois max.",
   "village.threads.new": "nouveau fil",
   "village.threads.create": "créer le fil",
   "village.threads.creating": "création…",
+  "village.threads.leave": "quitter",
+  "village.threads.no_messages": "pas encore de messages · brisez le silence.",
+  "village.threads.composer_placeholder": "envoyez un message au village…",
+  "village.threads.composer_note": "privé au fil · max 12 villageois · pas de compteurs publics",
   "live.watching_together": "on regarde ensemble",
   "common.charter": "membre fondateur",
   "common.private": "privé au fil",
-  "common.thread_cap": "max 12 villageois · pas de compteurs publics"
+  "common.thread_cap": "max 12 villageois · pas de compteurs publics",
+  "common.viewer_singular": "spectateur",
+  "common.viewer_plural": "spectateurs"
 }

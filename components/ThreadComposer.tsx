@@ -4,9 +4,11 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Send } from "lucide-react";
 import { postToThread } from "@/lib/thread-actions";
+import { useT } from "./I18nProvider";
 
 export function ThreadComposer({ threadId }: { threadId: string }) {
   const router = useRouter();
+  const t = useT();
   const [text, setText] = useState("");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export function ThreadComposer({ threadId }: { threadId: string }) {
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, 280))}
-          placeholder="message the village…"
+          placeholder={t("village.threads.composer_placeholder")}
           className="flex-1 bg-transparent border border-line focus:border-gold text-ink placeholder-muted-soft px-3 py-2 outline-none transition-colors text-sm"
         />
         <button
@@ -50,7 +52,7 @@ export function ThreadComposer({ threadId }: { threadId: string }) {
       </div>
       {error && <p className="text-warn text-xs mt-2">{error}</p>}
       <p className="mono-text text-[10px] text-muted mt-2 text-center">
-        private to thread · max 12 villagers · no public counts surfaced
+        {t("village.threads.composer_note")}
       </p>
     </form>
   );

@@ -13,6 +13,7 @@
 import { useState } from "react";
 import type { GlimpseRow } from "@/lib/queries";
 import { GlimpseLightbox } from "./GlimpseLightbox";
+import { useT } from "./I18nProvider";
 
 interface GlimpseStripProps {
   glimpses: GlimpseRow[];
@@ -20,6 +21,7 @@ interface GlimpseStripProps {
 
 export function GlimpseStrip({ glimpses }: GlimpseStripProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const t = useT();
 
   if (glimpses.length < 2) return null; // hide if not enough signal
 
@@ -30,9 +32,9 @@ export function GlimpseStrip({ glimpses }: GlimpseStripProps) {
         className="border-b border-line bg-paper"
       >
         <div className="px-5 pt-4 pb-1 flex items-baseline justify-between">
-          <h2 className="label-text text-ink">today · glimpse</h2>
+          <h2 className="label-text text-ink">{t("home.glimpse_today")}</h2>
           <span className="mono-text text-[10px] text-muted uppercase tracking-wider">
-            24h
+            {t("home.glimpse_window")}
           </span>
         </div>
         <ul className="flex gap-3 overflow-x-auto px-5 py-3 no-scrollbar">
