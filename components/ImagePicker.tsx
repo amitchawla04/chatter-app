@@ -70,7 +70,6 @@ export function ImagePicker({ onPicked, onCleared }: ImagePickerProps) {
         ref={inputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp,image/gif"
-        capture="environment"
         onChange={handleChange}
         className="hidden"
       />
