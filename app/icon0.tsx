@@ -1,8 +1,8 @@
 import { ImageResponse } from "next/og";
 
 /**
- * Chatter PWA icon — 192×192 for Android home-screen installs and Web Share.
- * "any maskable" → padded so Android adaptive-icon mask doesn't clip the wordmark.
+ * PWA icon — 192×192 · The Bite.
+ * Maskable: 16% safe-area padding so Android adaptive-icon mask doesn't clip.
  */
 export const size = { width: 192, height: 192 };
 export const contentType = "image/png";
@@ -18,18 +18,42 @@ export default function Icon192() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: "#0A0A0A",
-          fontFamily: "Georgia, serif",
-          fontStyle: "italic",
-          fontWeight: 600,
-          fontSize: 110,
-          letterSpacing: "-0.04em",
-          // 18% padding for Android adaptive-icon safe area
-          padding: "16%",
-          boxSizing: "border-box",
+          position: "relative",
         }}
       >
-        c<span style={{ color: "#FF2D2D" }}>.</span>
+        <div
+          style={{
+            position: "absolute",
+            width: 130,
+            height: 130,
+            borderRadius: 130,
+            background: "#FF2D2D",
+            top: 28,
+            left: 22,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 60,
+            height: 60,
+            borderRadius: 60,
+            background: "#FAF9F6",
+            top: 16,
+            left: 116,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 24,
+            height: 24,
+            borderRadius: 24,
+            background: "#0A0A0A",
+            bottom: 28,
+            right: 28,
+          }}
+        />
       </div>
     ),
     size,

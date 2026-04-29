@@ -1,8 +1,8 @@
 import { ImageResponse } from "next/og";
 
 /**
- * Apple touch icon — 180×180 warm-white + wordmark + red period.
- * Shows up on iOS home screen after Add to Home.
+ * Apple touch icon — 180×180 · The Bite.
+ * Shows on iOS home screen after Add to Home.
  */
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
@@ -18,15 +18,42 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: "#0A0A0A",
-          fontFamily: "Georgia, serif",
-          fontStyle: "italic",
-          fontWeight: 600,
-          fontSize: 96,
-          letterSpacing: "-0.03em",
+          position: "relative",
         }}
       >
-        c<span style={{ color: "#FF2D2D" }}>.</span>
+        <div
+          style={{
+            position: "absolute",
+            width: 124,
+            height: 124,
+            borderRadius: 124,
+            background: "#FF2D2D",
+            top: 22,
+            left: 18,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 56,
+            height: 56,
+            borderRadius: 56,
+            background: "#FAF9F6",
+            top: 12,
+            left: 108,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 22,
+            height: 22,
+            borderRadius: 22,
+            background: "#0A0A0A",
+            bottom: 26,
+            right: 26,
+          }}
+        />
       </div>
     ),
     size,
