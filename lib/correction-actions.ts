@@ -5,6 +5,7 @@ import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRate } from "@/lib/rate-limit";
 import { notifyUser } from "@/lib/push";
+import { sendCorrectionEmail } from "@/lib/email";
 
 /**
  * Submit an insider correction to a whisper.
@@ -72,19 +73,39 @@ export async function submitCorrection(params: {
     return { ok: false, error: error.message };
   }
 
-  // Notify the original whisper author
+  // Notify the original whisper author (push + email)
   if (whisper) {
-    const { data: me } = await admin
-      .from("users")
-      .select("handle, insider_tags")
-      .eq("id", user.id)
-      .maybeSingle();
-    notifyUser((whisper as { author_id: string }).author_id, {
+    const authorId = (whisper as { author_id: string }).author_id;
+    const [{ data: me }, { data: author }] = await Promise.all([
+      admin
+        .from("users")
+        .select("handle, insider_tags")
+        .eq("id", user.id)
+        .maybeSingle(),
+      admin.from("users").select("email").eq("id", authorId).maybeSingle(),
+    ]);
+    const insiderHandle = (me as { handle: string } | null)?.handle ?? "an insider";
+    const insiderTag =
+      (me as { insider_tags: string[] | null } | null)?.insider_tags?.[0]?.replace(
+        /_/g,
+        " ",
+      ) ?? null;
+    notifyUser(authorId, {
       kind: "correction.posted",
-      title: `@${me?.handle ?? "an insider"} pushed back on your whisper`,
+      title: `@${insiderHandle} pushed back on your whisper`,
       body: content.slice(0, 100),
       url: `/w/${params.whisperId}`,
     }).catch(() => {});
+    const authorEmail = (author as { email: string | null } | null)?.email;
+    if (authorEmail) {
+      sendCorrectionEmail({
+        to: authorEmail,
+        insiderHandle,
+        insiderTag,
+        correctionText: content,
+        whisperUrl: `https://chatter-ten-lemon.vercel.app/w/${params.whisperId}`,
+      }).catch(() => {});
+    }
   }
 
   revalidatePath(`/w/${params.whisperId}`);

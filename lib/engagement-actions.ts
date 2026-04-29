@@ -9,6 +9,7 @@ import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRate } from "@/lib/rate-limit";
 import { notifyUser } from "@/lib/push";
+import { sendPassReceivedEmail } from "@/lib/email";
 
 async function getAuthUser() {
   const supabase = await createServerClient();
@@ -144,17 +145,29 @@ export async function passWhisper(params: {
   }
 
   // Push notify recipient — Pact-permitted (passes, not engagement metrics)
-  const { data: from } = await admin
-    .from("users")
-    .select("handle")
-    .eq("id", user.id)
-    .maybeSingle();
+  const [{ data: from }, { data: recipient }] = await Promise.all([
+    admin.from("users").select("handle").eq("id", user.id).maybeSingle(),
+    admin.from("users").select("email").eq("id", params.toUserId).maybeSingle(),
+  ]);
+  const fromHandle = (from as { handle: string } | null)?.handle ?? "someone";
+  const excerpt = cur?.content_text?.slice(0, 200) ?? "(media whisper)";
   notifyUser(params.toUserId, {
     kind: "pass.received",
-    title: "@" + (from?.handle ?? "someone") + " passed you a whisper",
-    body: params.note ? `note: "${params.note.slice(0, 80)}"` : (cur?.content_text?.slice(0, 100) ?? "open it"),
+    title: "@" + fromHandle + " passed you a whisper",
+    body: params.note ? `note: "${params.note.slice(0, 80)}"` : excerpt.slice(0, 100),
     url: "/passes",
   }).catch(() => {});
+  // Email recipient (signal-bearing, not engagement)
+  const recipientEmail = (recipient as { email: string | null } | null)?.email;
+  if (recipientEmail) {
+    sendPassReceivedEmail({
+      to: recipientEmail,
+      fromHandle,
+      whisperExcerpt: excerpt,
+      note: params.note,
+      whisperUrl: `https://chatter-ten-lemon.vercel.app/w/${params.whisperId}`,
+    }).catch(() => {});
+  }
 
   revalidatePath("/passes");
   revalidatePath("/home");

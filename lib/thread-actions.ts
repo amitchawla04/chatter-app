@@ -13,6 +13,7 @@ import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRate } from "@/lib/rate-limit";
 import { notifyUser } from "@/lib/push";
+import { sendThreadInvitedEmail } from "@/lib/email";
 
 export async function createThread(params: {
   name: string;
@@ -70,19 +71,39 @@ export async function createThread(params: {
       .map((u) => ({ thread_id: thread.id, user_id: u.id, role: "member" as const }));
     if (rows.length > 0) {
       await admin.from("village_thread_participants").insert(rows);
-      // Notify each invitee
-      const { data: creator } = await admin
-        .from("users")
-        .select("handle")
-        .eq("id", user.id)
-        .maybeSingle();
+      // Notify each invitee (push + email)
+      const [{ data: creator }, { data: invitedUsers }, { data: topicData }] = await Promise.all([
+        admin.from("users").select("handle").eq("id", user.id).maybeSingle(),
+        admin
+          .from("users")
+          .select("id, email")
+          .in("id", rows.map((r) => r.user_id)),
+        admin.from("topics").select("name").eq("id", params.topicId).maybeSingle(),
+      ]);
+      const creatorHandle = (creator as { handle: string } | null)?.handle ?? "someone";
+      const topicName = (topicData as { name: string } | null)?.name ?? "a topic";
+      const emailByUserId = new Map<string, string>(
+        ((invitedUsers ?? []) as { id: string; email: string | null }[])
+          .filter((u) => u.email)
+          .map((u) => [u.id, u.email!]),
+      );
       for (const r of rows) {
         notifyUser(r.user_id, {
           kind: "thread.invited",
-          title: `@${creator?.handle ?? "someone"} added you to "${name}"`,
+          title: `@${creatorHandle} added you to "${name}"`,
           body: "tap to join the village thread.",
           url: `/v/${thread.id}`,
         }).catch(() => {});
+        const email = emailByUserId.get(r.user_id);
+        if (email) {
+          sendThreadInvitedEmail({
+            to: email,
+            fromHandle: creatorHandle,
+            threadName: name,
+            threadUrl: `https://chatter-ten-lemon.vercel.app/v/${thread.id}`,
+            topicName,
+          }).catch(() => {});
+        }
       }
     }
   }
@@ -178,17 +199,37 @@ export async function inviteToThread(params: { threadId: string; handle: string 
     .insert({ thread_id: params.threadId, user_id: target.id, role: "member" });
   if (error) return { ok: false, error: error.message };
 
-  // Push notify
-  const [{ data: thread }, { data: inviter }] = await Promise.all([
-    admin.from("village_threads").select("name").eq("id", params.threadId).maybeSingle(),
+  // Push + email notify
+  const [{ data: thread }, { data: inviter }, { data: targetUser }] = await Promise.all([
+    admin
+      .from("village_threads")
+      .select("name, topics:topic_id(name)")
+      .eq("id", params.threadId)
+      .maybeSingle(),
     admin.from("users").select("handle").eq("id", user.id).maybeSingle(),
+    admin.from("users").select("email").eq("id", target.id).maybeSingle(),
   ]);
+  const inviterHandle = (inviter as { handle: string } | null)?.handle ?? "someone";
+  const threadRow = thread as
+    | { name: string; topics: { name: string } | null }
+    | null;
+  const threadName = threadRow?.name ?? "a thread";
   notifyUser(target.id, {
     kind: "thread.invited",
-    title: `@${inviter?.handle ?? "someone"} added you to "${thread?.name ?? "a thread"}"`,
+    title: `@${inviterHandle} added you to "${threadName}"`,
     body: "tap to join the village thread.",
     url: `/v/${params.threadId}`,
   }).catch(() => {});
+  const targetEmail = (targetUser as { email: string | null } | null)?.email;
+  if (targetEmail) {
+    sendThreadInvitedEmail({
+      to: targetEmail,
+      fromHandle: inviterHandle,
+      threadName,
+      threadUrl: `https://chatter-ten-lemon.vercel.app/v/${params.threadId}`,
+      topicName: threadRow?.topics?.name ?? "a topic",
+    }).catch(() => {});
+  }
 
   revalidatePath(`/v/${params.threadId}`);
   return { ok: true };
