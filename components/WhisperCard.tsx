@@ -52,7 +52,7 @@ export function WhisperCard({
 }: WhisperCardProps) {
   const router = useRouter();
   const [echoed, setEchoed] = useState(initiallyEchoed);
-  const [echoCount, setEchoCount] = useState(whisper.echo_count);
+  const [, setEchoCount] = useState(whisper.echo_count);
   const [saved, setSaved] = useState(initiallySaved);
   const [spoilerRevealed, setSpoilerRevealed] = useState(false);
   const [passOpen, setPassOpen] = useState(false);
@@ -378,7 +378,7 @@ export function WhisperCard({
             aria-label="Echo — silently corroborate"
           >
             <EchoGlyph size={16} strokeWidth={1.6} filled={echoed} />
-            <span className="mono-text">{echoCount}</span>
+            <span className="mono-text text-[10px] uppercase tracking-wider">{echoed ? "echoed" : "echo"}</span>
           </button>
           <button
             type="button"
