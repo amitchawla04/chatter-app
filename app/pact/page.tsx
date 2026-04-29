@@ -4,6 +4,7 @@
  */
 import Link from "next/link";
 import { ChatterMark } from "@/components/ChatterMark";
+import { PactViolationForm } from "@/components/PactViolationForm";
 
 export const metadata = {
   title: "The Chatter Pact — 14 commitments",
@@ -100,7 +101,11 @@ export default function PactPage() {
             ))}
           </div>
 
-          <div className="mt-16 border-t border-line pt-8">
+          <div className="mt-16 border-t border-line pt-12">
+            <PactViolationForm />
+          </div>
+
+          <div className="mt-12 border-t border-line pt-8">
             <p className="mono-text text-xs text-muted max-w-xl leading-relaxed">
               Version 1.3 · locked 2026-04-22 · grounded in 660 verified user-voice
               data points across X, Reddit, App Store, and Gen Z mining. Future

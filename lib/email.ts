@@ -37,6 +37,16 @@ interface SendResult {
   error?: string;
 }
 
+export async function sendEmail(params: {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+  tag?: string;
+}): Promise<SendResult> {
+  return send({ ...params, text: params.text ?? params.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() });
+}
+
 async function send(params: {
   to: string;
   subject: string;

@@ -133,7 +133,7 @@ export default function LandingPage() {
         transition={{ duration: 1, delay: 1.8 }}
         className="px-6 sm:px-10 pb-8"
       >
-        <div className="border-t border-line pt-5 flex items-center justify-center gap-5 text-xs mono-text text-muted">
+        <div className="border-t border-line pt-5 flex items-center justify-center flex-wrap gap-x-5 gap-y-2 text-xs mono-text text-muted">
           <Link href="/pact" className="text-red hover:text-ink transition-colors">
             the pact
           </Link>
@@ -142,7 +142,19 @@ export default function LandingPage() {
             privacy
           </Link>
           <span className="opacity-40">·</span>
-          <span>v0.2</span>
+          <Link href="/terms" className="hover:text-ink transition-colors">
+            terms
+          </Link>
+          <span className="opacity-40">·</span>
+          <Link href="/charter" className="hover:text-ink transition-colors">
+            the charter
+          </Link>
+          <span className="opacity-40">·</span>
+          <Link href="/changelog" className="hover:text-ink transition-colors">
+            what&apos;s new
+          </Link>
+          <span className="opacity-40">·</span>
+          <span>v0.3</span>
         </div>
       </motion.footer>
     </main>
