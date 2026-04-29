@@ -1,20 +1,26 @@
 /**
  * Next.js instrumentation hook — runs once at server startup.
- * Lightweight observability without bringing in Sentry SDK weight.
- *
- * For production: drop in @sentry/nextjs and replace registerLogger() with
- * Sentry.init({ dsn: process.env.SENTRY_DSN }). The shape is the same.
+ * Wires Sentry for both Node.js and Edge runtimes, plus structured logs to
+ * Vercel.
  */
+
+import * as Sentry from "@sentry/nextjs";
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
+    await import("./sentry.server.config");
     registerLogger();
+  } else if (process.env.NEXT_RUNTIME === "edge") {
+    await import("./sentry.edge.config");
   }
 }
 
+// Sentry's request-error hook — captures errors thrown in server components
+// and route handlers
+export const onRequestError = Sentry.captureRequestError;
+
 function registerLogger() {
   // Wrap unhandledRejection + uncaughtException with structured logs.
-  // These show up in Vercel logs and can be queried.
   process.on("unhandledRejection", (reason: unknown) => {
     const err = reason instanceof Error ? reason : new Error(String(reason));
     console.error(
@@ -26,6 +32,7 @@ function registerLogger() {
         timestamp: new Date().toISOString(),
       }),
     );
+    Sentry.captureException(err);
   });
 
   process.on("uncaughtException", (err: Error) => {
@@ -38,6 +45,7 @@ function registerLogger() {
         timestamp: new Date().toISOString(),
       }),
     );
+    Sentry.captureException(err);
   });
 
   console.log(
@@ -45,6 +53,7 @@ function registerLogger() {
       level: "info",
       type: "boot",
       message: "chatter instrumentation registered",
+      sentry_enabled: Boolean(process.env.SENTRY_DSN),
       timestamp: new Date().toISOString(),
       env: process.env.VERCEL_ENV ?? "unknown",
     }),
@@ -53,7 +62,6 @@ function registerLogger() {
 
 /**
  * Public helper for application code to log structured errors.
- * import { logError } from "@/instrumentation"; logError("compose_failed", err, { whisperId });
  */
 export function logError(
   type: string,
@@ -71,4 +79,5 @@ export function logError(
       timestamp: new Date().toISOString(),
     }),
   );
+  Sentry.captureException(error, { tags: { type }, extra: context });
 }
