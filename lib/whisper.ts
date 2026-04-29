@@ -29,6 +29,8 @@ export type WhisperRow = {
   pass_count: number;
   corroboration_count: number;
   created_at: string;
+  edited_at?: string | null;
+  edit_count?: number | null;
   author: {
     handle: string;
     display_name: string;
@@ -68,6 +70,8 @@ export type WhisperJoinRow = {
   pass_count: number;
   corroboration_count: number;
   created_at: string;
+  edited_at?: string | null;
+  edit_count?: number | null;
   users: {
     handle: string;
     display_name: string;
@@ -108,6 +112,8 @@ export function joinRowToWhisperRow(row: WhisperJoinRow): WhisperRow {
     pass_count: row.pass_count,
     corroboration_count: row.corroboration_count,
     created_at: row.created_at,
+    edited_at: row.edited_at ?? null,
+    edit_count: row.edit_count ?? null,
     author: row.users,
     topic: row.topics,
   };

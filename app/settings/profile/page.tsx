@@ -44,9 +44,9 @@ export default async function EditProfilePage() {
           initialLocation={me.location ?? ""}
         />
 
-        {me.insider_tags && me.insider_tags.length > 0 && (
-          <div className="mt-10 pt-6 border-t border-line">
-            <p className="label-text text-muted mb-2">verified credentials</p>
+        <div className="mt-10 pt-6 border-t border-line">
+          <p className="label-text text-muted mb-2">verified credentials</p>
+          {me.insider_tags && me.insider_tags.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {(me.insider_tags as string[]).map((t) => (
                 <span
@@ -57,11 +57,14 @@ export default async function EditProfilePage() {
                 </span>
               ))}
             </div>
-            <p className="mono-text text-[11px] text-muted mt-3">
-              earned via vouches from people who&rsquo;ve worked with you.
-            </p>
+          ) : (
+            <p className="text-muted text-xs italic">no credentials yet</p>
+          )}
+          <div className="mono-text text-[11px] text-muted mt-3 flex items-center gap-2">
+            <span>verified through review.</span>
+            <Link href="/you/credentials" className="underline hover:text-ink">claim a credential →</Link>
           </div>
-        )}
+        </div>
       </section>
 
       <TabBar />

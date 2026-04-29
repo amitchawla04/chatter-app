@@ -333,6 +333,14 @@ export function WhisperCard({
           >
             {when}
           </Link>
+          {(whisper.edit_count ?? 0) > 0 && (
+            <span
+              className="text-muted/70 italic text-[10px]"
+              title={whisper.edited_at ? `edited ${relativeTime(whisper.edited_at)} ago` : "edited"}
+            >
+              · edited
+            </span>
+          )}
           {whisper.scope !== "public" && (
             <>
               <span>·</span>
