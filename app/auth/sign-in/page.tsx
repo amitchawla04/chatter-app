@@ -110,6 +110,7 @@ export default function SignInPage() {
 
   return (
     <main className="min-h-screen flex flex-col">
+      <h1 className="sr-only">Sign in to Chatter</h1>
       <header className="px-6 sm:px-10 pt-6 sm:pt-8 flex justify-between items-center">
         <Link href="/" className="inline-block">
           <ChatterMark size="sm" pulse="breath" />

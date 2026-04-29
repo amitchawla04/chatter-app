@@ -186,6 +186,7 @@ export default async function WhisperDetailPage({
 
   return (
     <main className="min-h-screen pb-28">
+      <h1 className="sr-only">Whisper · Chatter</h1>
       <header className="sticky top-0 z-40 bg-canvas/95 backdrop-blur border-b border-line px-5 py-4 flex items-center justify-between">
         <Link href="/home" className="text-muted hover:text-ink transition">
           ←

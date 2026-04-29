@@ -21,6 +21,7 @@ import { ChatterMark } from "@/components/ChatterMark";
 export default function LandingPage() {
   return (
     <main className="min-h-screen flex flex-col">
+      <h1 className="sr-only">Chatter — whispers from people who actually know</h1>
       {/* Minimal header — just a label anchor */}
       <header className="px-6 sm:px-10 pt-6 sm:pt-8 flex justify-between items-center">
         <span className="label-text text-muted">Research preview · 2026</span>

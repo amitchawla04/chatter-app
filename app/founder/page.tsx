@@ -189,6 +189,7 @@ export default async function FounderDashboard() {
 
   return (
     <main className="min-h-screen pb-28 bg-canvas">
+      <h1 className="sr-only">Founder operator dashboard · Chatter</h1>
       <header className="sticky top-0 z-40 bg-ink text-paper px-5 py-4 flex items-center justify-between border-b border-gold">
         <Link href="/home" className="text-paper/60 hover:text-paper transition mono-text text-xs">
           ← home

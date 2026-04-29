@@ -67,6 +67,7 @@ export default async function CheckoutPage({
 
   return (
     <main className="min-h-screen pb-32">
+      <h1 className="sr-only">Get ticket · {e.title} · Chatter</h1>
       <header className="sticky top-0 z-40 bg-canvas/95 backdrop-blur border-b border-line px-5 py-4 flex items-center justify-between">
         <Link href={`/live/${id}`} className="text-muted hover:text-ink transition" aria-label="back">
           ←

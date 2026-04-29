@@ -37,7 +37,7 @@ export function GlimpseStrip({ glimpses }: GlimpseStripProps) {
             {t("home.glimpse_window")}
           </span>
         </div>
-        <ul className="flex gap-3 overflow-x-auto px-5 py-3 no-scrollbar">
+        <ul tabIndex={0} role="region" aria-label="glimpse · last 24 hours of village photos" className="flex gap-3 overflow-x-auto px-5 py-3 no-scrollbar focus:outline-none focus-visible:ring-2 focus-visible:ring-red">
           {glimpses.map((g, i) => (
             <li key={g.id} className="flex-none">
               <button

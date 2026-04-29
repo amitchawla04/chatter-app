@@ -33,6 +33,7 @@ export default async function CCEPDashboard() {
   if (!grants || grants.length === 0) {
     return (
       <main className="min-h-screen pb-28">
+        <h1 className="sr-only">CCEP equity · Chatter</h1>
         <Header />
         <section className="px-6 py-20 text-center">
           <p className="display-italic text-2xl text-ink mb-3">no equity grants yet.</p>

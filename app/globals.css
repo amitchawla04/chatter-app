@@ -28,6 +28,20 @@
     background-color: #FF2D2D;
     color: #FFFFFF;
   }
+
+  /* a11y: inline links inside body paragraphs need a non-color cue (underline).
+     Buttons, navigation, and tagged components opt out via the .no-underline-link
+     escape hatch or by living outside <p>/body-text containers. */
+  .body-text a,
+  .prose-ish a,
+  p > a:not(.no-underline-link):not([class*="btn"]):not([class*="bg-"]) {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+  }
+  p > a:not(.no-underline-link):not([class*="btn"]):not([class*="bg-"]):hover {
+    text-decoration-thickness: 1.5px;
+  }
 }
 
 @layer components {

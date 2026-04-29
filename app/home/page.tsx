@@ -67,6 +67,7 @@ export default async function HomePage({
 
   return (
     <main className="min-h-screen pb-28">
+      <h1 className="sr-only">Home feed · Chatter</h1>
       <OpeningMoment
         proofText={proof?.content_text ?? null}
         proofAuthor={proof?.author.handle ?? null}

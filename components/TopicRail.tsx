@@ -23,7 +23,7 @@ export function TopicRail({ topics }: { topics: TopicRailItem[] }) {
   if (topics.length === 0) return null;
   return (
     <div className="px-3 pt-3 pb-4 border-b border-line/60">
-      <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-3 px-3">
+      <div tabIndex={0} role="region" aria-label="topic rail" className="flex gap-3 overflow-x-auto no-scrollbar -mx-3 px-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-red">
         {topics.map((t) => (
           <Link
             key={t.id}

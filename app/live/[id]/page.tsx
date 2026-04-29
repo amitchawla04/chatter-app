@@ -153,6 +153,7 @@ export default async function LiveEventPage({
 
   return (
     <main className="min-h-screen pb-32">
+      <h1 className="sr-only">{e.title} · live · Chatter</h1>
       <header className="sticky top-0 z-40 bg-canvas/95 backdrop-blur border-b border-line px-5 py-4 flex items-center justify-between">
         <Link href="/home" className="text-muted hover:text-ink transition">
           ←
@@ -241,7 +242,7 @@ export default async function LiveEventPage({
       {moments.length > 0 && (
         <section className="px-5 py-5 border-b border-line">
           <h2 className="label-text text-muted mb-3">timeline</h2>
-          <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-5 px-5 pb-1">
+          <div tabIndex={0} role="region" aria-label="event timeline" className="flex gap-2 overflow-x-auto no-scrollbar -mx-5 px-5 pb-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-red">
             {moments.map((m) => (
               <div
                 key={m.id}

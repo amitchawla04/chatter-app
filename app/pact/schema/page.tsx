@@ -242,28 +242,28 @@ export default function PactSchemaPage() {
                       <span className="mono-text text-xs text-muted">{p.id}</span>
                       <h3 className="display-italic text-lg text-ink leading-snug">{p.statement}</h3>
                     </div>
-                    <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                    <div className="grid sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
                       <div>
-                        <dt className="mono-text text-[10px] uppercase tracking-wider text-muted mb-1">violates</dt>
-                        <dd className="text-ink leading-relaxed">{p.violates}</dd>
-                      </div>
-                      <div>
-                        <dt className="mono-text text-[10px] uppercase tracking-wider text-muted mb-1">burden of compliance</dt>
-                        <dd className="text-ink mono-text uppercase tracking-wider text-xs">{p.burden}</dd>
+                        <p className="mono-text text-[10px] uppercase tracking-wider text-muted mb-1">violates</p>
+                        <p className="text-ink leading-relaxed">{p.violates}</p>
                       </div>
                       <div>
-                        <dt className="mono-text text-[10px] uppercase tracking-wider text-muted mb-1">audit mechanism</dt>
-                        <dd className="text-ink leading-relaxed">{p.audit}</dd>
+                        <p className="mono-text text-[10px] uppercase tracking-wider text-muted mb-1">burden of compliance</p>
+                        <p className="text-ink mono-text uppercase tracking-wider text-xs">{p.burden}</p>
                       </div>
                       <div>
-                        <dt className="mono-text text-[10px] uppercase tracking-wider text-muted mb-1">escalation path</dt>
-                        <dd className="text-ink leading-relaxed">{p.escalation}</dd>
+                        <p className="mono-text text-[10px] uppercase tracking-wider text-muted mb-1">audit mechanism</p>
+                        <p className="text-ink leading-relaxed">{p.audit}</p>
                       </div>
-                      <div className="sm:col-span-2 pt-2 border-t border-line">
-                        <span className="mono-text text-[10px] uppercase tracking-wider text-muted">added · </span>
-                        <span className="mono-text text-[11px] text-muted">{p.added}</span>
+                      <div>
+                        <p className="mono-text text-[10px] uppercase tracking-wider text-muted mb-1">escalation path</p>
+                        <p className="text-ink leading-relaxed">{p.escalation}</p>
                       </div>
-                    </dl>
+                    </div>
+                    <p className="mt-4 pt-3 border-t border-line">
+                      <span className="mono-text text-[10px] uppercase tracking-wider text-muted">added · </span>
+                      <span className="mono-text text-[11px] text-muted">{p.added}</span>
+                    </p>
                   </article>
                 ))}
               </div>

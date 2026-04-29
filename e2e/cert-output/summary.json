@@ -1,0 +1,557 @@
+{
+  "generatedAt": "2026-04-29T16:00:48.228Z",
+  "base": "https://chatter.today",
+  "totalRoutes": 41,
+  "routesWithConsoleErrors": 0,
+  "routesWithFailedRequests": 0,
+  "routesWithA11yViolations": 11,
+  "routesWith4xx5xx": 0,
+  "routes": [
+    {
+      "label": "01-landing",
+      "path": "/",
+      "url": "https://chatter.today/",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [
+        {
+          "id": "page-has-heading-one",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Page should contain a level-one heading"
+        }
+      ],
+      "durationMs": 2640
+    },
+    {
+      "label": "02-home",
+      "path": "/home",
+      "url": "https://chatter.today/home",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [
+        {
+          "id": "page-has-heading-one",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Page should contain a level-one heading"
+        }
+      ],
+      "durationMs": 8612
+    },
+    {
+      "label": "03-explore",
+      "path": "/explore",
+      "url": "https://chatter.today/explore",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 8484
+    },
+    {
+      "label": "04-live-index",
+      "path": "/live",
+      "url": "https://chatter.today/live",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 4750
+    },
+    {
+      "label": "05-live-event-ticketed-gate",
+      "path": "/live/eeeeeeee-eeee-eeee-eeee-eeeeeeeeee10",
+      "url": "https://chatter.today/live/eeeeeeee-eeee-eeee-eeee-eeeeeeeeee10",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 4571
+    },
+    {
+      "label": "06-live-event-match",
+      "path": "/live/eeeeeeee-eeee-eeee-eeee-eeeeeeeeee01",
+      "url": "https://chatter.today/live/eeeeeeee-eeee-eeee-eeee-eeeeeeeeee01",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [
+        {
+          "id": "page-has-heading-one",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Page should contain a level-one heading"
+        },
+        {
+          "id": "scrollable-region-focusable",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "Scrollable region must have keyboard access"
+        }
+      ],
+      "durationMs": 4839
+    },
+    {
+      "label": "07-pact",
+      "path": "/pact",
+      "url": "https://chatter.today/pact",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 3396
+    },
+    {
+      "label": "08-pact-schema",
+      "path": "/pact/schema",
+      "url": "https://chatter.today/pact/schema",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [
+        {
+          "id": "definition-list",
+          "impact": "serious",
+          "nodes": 14,
+          "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements"
+        },
+        {
+          "id": "link-in-text-block",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "Links must be distinguishable without relying on color"
+        }
+      ],
+      "durationMs": 2902
+    },
+    {
+      "label": "09-charter",
+      "path": "/charter",
+      "url": "https://chatter.today/charter",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 4604
+    },
+    {
+      "label": "10-changelog",
+      "path": "/changelog",
+      "url": "https://chatter.today/changelog",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 4135
+    },
+    {
+      "label": "11-terms",
+      "path": "/terms",
+      "url": "https://chatter.today/terms",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [
+        {
+          "id": "link-in-text-block",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "Links must be distinguishable without relying on color"
+        }
+      ],
+      "durationMs": 3065
+    },
+    {
+      "label": "12-privacy",
+      "path": "/privacy",
+      "url": "https://chatter.today/privacy",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [
+        {
+          "id": "link-in-text-block",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "Links must be distinguishable without relying on color"
+        }
+      ],
+      "durationMs": 2975
+    },
+    {
+      "label": "13-community",
+      "path": "/community",
+      "url": "https://chatter.today/community",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 2674
+    },
+    {
+      "label": "14-ai",
+      "path": "/ai",
+      "url": "https://chatter.today/ai",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 2839
+    },
+    {
+      "label": "15-auth-sign-in",
+      "path": "/auth/sign-in",
+      "url": "https://chatter.today/auth/sign-in",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [
+        {
+          "id": "link-in-text-block",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "Links must be distinguishable without relying on color"
+        }
+      ],
+      "durationMs": 2697
+    },
+    {
+      "label": "16-onboard-beta",
+      "path": "/onboard/beta",
+      "url": "https://chatter.today/onboard/beta",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [
+        {
+          "id": "link-in-text-block",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "Links must be distinguishable without relying on color"
+        }
+      ],
+      "durationMs": 3646
+    },
+    {
+      "label": "17-search",
+      "path": "/search?q=premier",
+      "url": "https://chatter.today/search?q=premier",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 3871
+    },
+    {
+      "label": "18-topic-page",
+      "path": "/t/show-the-bear",
+      "url": "https://chatter.today/t/show-the-bear",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 5102
+    },
+    {
+      "label": "19-ticketed-checkout",
+      "path": "/live/eeeeeeee-eeee-eeee-eeee-eeeeeeeeee10/checkout",
+      "url": "https://chatter.today/live/eeeeeeee-eeee-eeee-eeee-eeeeeeeeee10/checkout",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [
+        {
+          "id": "page-has-heading-one",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Page should contain a level-one heading"
+        }
+      ],
+      "durationMs": 2865
+    },
+    {
+      "label": "20-compose",
+      "path": "/compose",
+      "url": "https://chatter.today/compose",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 1741
+    },
+    {
+      "label": "21-passes",
+      "path": "/passes",
+      "url": "https://chatter.today/passes",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 3993
+    },
+    {
+      "label": "22-saved",
+      "path": "/saved",
+      "url": "https://chatter.today/saved",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 3390
+    },
+    {
+      "label": "23-activity",
+      "path": "/activity",
+      "url": "https://chatter.today/activity",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 3824
+    },
+    {
+      "label": "24-settings",
+      "path": "/settings",
+      "url": "https://chatter.today/settings",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 6570
+    },
+    {
+      "label": "25-settings-profile",
+      "path": "/settings/profile",
+      "url": "https://chatter.today/settings/profile",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 4117
+    },
+    {
+      "label": "26-settings-account",
+      "path": "/settings/account",
+      "url": "https://chatter.today/settings/account",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 3405
+    },
+    {
+      "label": "27-settings-data",
+      "path": "/settings/data",
+      "url": "https://chatter.today/settings/data",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 3992
+    },
+    {
+      "label": "28-settings-notifications",
+      "path": "/settings/notifications",
+      "url": "https://chatter.today/settings/notifications",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 2823
+    },
+    {
+      "label": "29-settings-language",
+      "path": "/settings/language",
+      "url": "https://chatter.today/settings/language",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 5210
+    },
+    {
+      "label": "30-settings-privacy",
+      "path": "/settings/privacy",
+      "url": "https://chatter.today/settings/privacy",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 3570
+    },
+    {
+      "label": "31-you",
+      "path": "/you",
+      "url": "https://chatter.today/you",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 5964
+    },
+    {
+      "label": "32-you-equity",
+      "path": "/you/equity",
+      "url": "https://chatter.today/you/equity",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [
+        {
+          "id": "link-in-text-block",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "Links must be distinguishable without relying on color"
+        },
+        {
+          "id": "page-has-heading-one",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Page should contain a level-one heading"
+        }
+      ],
+      "durationMs": 4593
+    },
+    {
+      "label": "33-you-feeds",
+      "path": "/you/feeds",
+      "url": "https://chatter.today/you/feeds",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 3784
+    },
+    {
+      "label": "34-you-credentials",
+      "path": "/you/credentials",
+      "url": "https://chatter.today/you/credentials",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 4834
+    },
+    {
+      "label": "35-you-vouches",
+      "path": "/you/vouches/network",
+      "url": "https://chatter.today/you/vouches/network",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 3371
+    },
+    {
+      "label": "36-village-index",
+      "path": "/v",
+      "url": "https://chatter.today/v",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 4974
+    },
+    {
+      "label": "37-village-new",
+      "path": "/v/new",
+      "url": "https://chatter.today/v/new",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 3952
+    },
+    {
+      "label": "38-founder-dashboard",
+      "path": "/founder",
+      "url": "https://chatter.today/founder",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [
+        {
+          "id": "page-has-heading-one",
+          "impact": "moderate",
+          "nodes": 1,
+          "help": "Page should contain a level-one heading"
+        }
+      ],
+      "durationMs": 5918
+    },
+    {
+      "label": "39-founder-invites",
+      "path": "/founder/invites",
+      "url": "https://chatter.today/founder/invites",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 3618
+    },
+    {
+      "label": "40-founder-insider-claims",
+      "path": "/founder/insider-claims",
+      "url": "https://chatter.today/founder/insider-claims",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 4349
+    },
+    {
+      "label": "41-moderation",
+      "path": "/moderation",
+      "url": "https://chatter.today/moderation",
+      "status": 200,
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "failedRequests": [],
+      "a11yViolations": [],
+      "durationMs": 3539
+    }
+  ]
+}
