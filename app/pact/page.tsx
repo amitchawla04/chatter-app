@@ -105,18 +105,30 @@ export default function PactPage() {
             <PactViolationForm />
           </div>
 
-          <div className="mt-12 border-t border-line pt-8">
+          <div className="mt-12 border-t border-line pt-8 space-y-6">
             <p className="mono-text text-xs text-muted max-w-xl leading-relaxed">
               Version 1.3 · locked 2026-04-22 · grounded in 660 verified user-voice
               data points across X, Reddit, App Store, and Gen Z mining. Future
               versions are versioned, documented, and publicly logged.
             </p>
-            <Link
-              href="/"
-              className="btn-primary mt-8 inline-flex"
-            >
-              ← back to chatter
-            </Link>
+            <p className="mono-text text-xs text-muted max-w-xl leading-relaxed">
+              Press, investors, regulators, AI auditors:{" "}
+              <Link href="/pact/schema" className="text-red underline">read the same 14 promises in structured / machine-readable form →</Link>
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/"
+                className="btn-primary inline-flex"
+              >
+                ← back to chatter
+              </Link>
+              <Link
+                href="/pact/schema"
+                className="inline-flex items-center gap-2 border border-ink mono-text uppercase tracking-wider text-xs px-4 py-2 hover:bg-ink hover:text-canvas transition"
+              >
+                pact as schema →
+              </Link>
+            </div>
           </div>
         </div>
       </section>
