@@ -14,8 +14,8 @@ import { WatchTogether } from "@/components/WatchTogether";
 import { MomentWhisper } from "@/components/MomentWhisper";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
-import { fetchTopicWhispers, fetchEchoedIds, fetchSavedIds } from "@/lib/queries";
-import { relativeTime } from "@/lib/whisper";
+import { fetchTopicWhispers, fetchEchoedIds, fetchSavedIds, userHasTicket } from "@/lib/queries";
+import { Ticket } from "lucide-react";
 
 export const revalidate = 10;
 
@@ -79,6 +79,8 @@ interface LiveEvent {
   away_score: number | null;
   minute_label: string | null;
   starts_at: string;
+  is_ticketed: boolean | null;
+  ticket_price_cents: number | null;
 }
 
 interface Moment {
@@ -133,6 +135,14 @@ export default async function LiveEventPage({
     data: { user },
   } = await supabase.auth.getUser();
   const isAuthed = Boolean(user);
+
+  const isTicketed = e.is_ticketed === true;
+  const hasTicket = isTicketed ? await userHasTicket(id) : true;
+  const showGate = isTicketed && !hasTicket;
+  const priceLabel = isTicketed
+    ? `$${((e.ticket_price_cents ?? 500) / 100).toFixed(2)}`
+    : "";
+
   const ids = whispers.map((w) => w.id);
   const [echoedIds, savedIds] = await Promise.all([
     fetchEchoedIds(ids),
@@ -196,10 +206,38 @@ export default async function LiveEventPage({
         </section>
       )}
 
-      {/* Watch-together presence — only renders if 1+ viewers active in last 60s */}
-      <WatchTogether eventId={e.id} isAuthed={isAuthed} />
+      {/* Ticketed-space gate — non-holders see CTA; holders + non-ticketed events see full content */}
+      {isTicketed && hasTicket && (
+        <div className="px-5 py-3 border-b border-line bg-paper flex items-center justify-center gap-2 text-xs mono-text text-ink uppercase tracking-wider">
+          <Ticket size={14} strokeWidth={1.5} className="text-red" />
+          <span>Ticketed access · you&apos;re in</span>
+        </div>
+      )}
 
-      {/* Event timeline */}
+      {showGate ? (
+        <section className="px-5 py-12 border-b border-line text-center max-w-md mx-auto">
+          <Ticket size={36} strokeWidth={1.25} className="text-red mx-auto mb-4" />
+          <h2 className="display-italic text-2xl text-ink mb-2">This Space is ticketed</h2>
+          <p className="text-muted text-sm mb-6 leading-relaxed">
+            Live whispers and the watch-together view are reserved for ticket holders. {priceLabel} unlocks full access.
+          </p>
+          <Link
+            href={isAuthed ? `/live/${e.id}/checkout` : `/auth/sign-in?redirect=/live/${e.id}/checkout`}
+            className="inline-flex items-center gap-2 bg-red text-canvas mono-text uppercase tracking-wider text-sm px-6 py-3 hover:opacity-90 transition"
+          >
+            <Ticket size={14} strokeWidth={2} />
+            <span>Get ticket · {priceLabel}</span>
+          </Link>
+          <p className="text-muted text-[11px] mt-4 mono-text">
+            beta · simulated payment · real OTP via SMS
+          </p>
+        </section>
+      ) : (
+        <>
+          {/* Watch-together presence — only renders if 1+ viewers active in last 60s */}
+          <WatchTogether eventId={e.id} isAuthed={isAuthed} />
+
+          {/* Event timeline */}
       {moments.length > 0 && (
         <section className="px-5 py-5 border-b border-line">
           <h2 className="label-text text-muted mb-3">timeline</h2>
@@ -251,19 +289,21 @@ export default async function LiveEventPage({
         )}
       </section>
 
-      {/* Moment-whisper — opens inline mini composer with event context, auto-triggers on score change */}
-      <MomentWhisper
-        eventId={e.id}
-        eventTopicId={e.topic_id}
-        eventTitle={e.title}
-        isAuthed={isAuthed}
-        homeLabel={e.home_label}
-        awayLabel={e.away_label}
-        homeScore={e.home_score}
-        awayScore={e.away_score}
-        minuteLabel={e.minute_label}
-        status={e.status}
-      />
+          {/* Moment-whisper — opens inline mini composer with event context, auto-triggers on score change */}
+          <MomentWhisper
+            eventId={e.id}
+            eventTopicId={e.topic_id}
+            eventTitle={e.title}
+            isAuthed={isAuthed}
+            homeLabel={e.home_label}
+            awayLabel={e.away_label}
+            homeScore={e.home_score}
+            awayScore={e.away_score}
+            minuteLabel={e.minute_label}
+            status={e.status}
+          />
+        </>
+      )}
 
       <TabBar />
     </main>

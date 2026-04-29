@@ -524,3 +524,23 @@ export async function fetchSavedIds(whisperIds: string[]): Promise<Set<string>> 
 
   return new Set((data ?? []).map((r) => r.whisper_id));
 }
+
+/**
+ * Whether the current user holds a ticket for the given live event.
+ */
+export async function userHasTicket(eventId: string): Promise<boolean> {
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("live_event_tickets")
+    .select("id")
+    .eq("event_id", eventId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  return Boolean(data);
+}
