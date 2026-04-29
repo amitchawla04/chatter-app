@@ -98,9 +98,11 @@ export default async function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
-        {/* Performance — preconnect to Supabase for faster API + storage hits */}
+        {/* Performance — preconnect to Supabase + Unsplash for faster API + image hits */}
         <link rel="preconnect" href="https://kpgsrntbmzdqvspcyekf.supabase.co" />
         <link rel="dns-prefetch" href="https://kpgsrntbmzdqvspcyekf.supabase.co" />
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
       </head>
       <body className="bg-canvas text-ink font-body antialiased">
         <I18nProvider locale={locale} dict={dict} fallback={DICTS.en}>

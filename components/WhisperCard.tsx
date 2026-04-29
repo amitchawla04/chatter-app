@@ -12,7 +12,7 @@
  * Spoiler mask obscures content until tap.
  */
 
-import { useState, useTransition, useRef } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useTransform, type PanInfo } from "framer-motion";
@@ -511,16 +511,49 @@ function InlineReplyMini({
 }
 
 function VoiceBlock({ url, duration }: { url: string | null; duration: number }) {
-  const bars = 32;
-  const heights = Array.from({ length: bars }, (_, i) => {
-    const seed = Math.sin(i * 1.618) * 0.5 + 0.5;
-    return Math.max(6, Math.floor(seed * 22));
-  });
+  const BARS = 40;
+  const heights = useRef(
+    Array.from({ length: BARS }, (_, i) => {
+      const seed = Math.sin(i * 1.618) * 0.5 + 0.5;
+      return Math.max(8, Math.floor(seed * 26));
+    }),
+  );
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0); // 0..1
+  const [resolvedDuration, setResolvedDuration] = useState(duration || 0);
+
+  // Track playback progress
+  useEffect(() => {
+    const a = audioRef.current;
+    if (!a) return;
+    const onTime = () => {
+      if (!a.duration || isNaN(a.duration)) return;
+      setProgress(a.currentTime / a.duration);
+    };
+    const onEnd = () => {
+      setPlaying(false);
+      setProgress(0);
+      a.currentTime = 0;
+    };
+    const onLoaded = () => {
+      if (a.duration && !isNaN(a.duration)) setResolvedDuration(Math.round(a.duration));
+    };
+    a.addEventListener("timeupdate", onTime);
+    a.addEventListener("ended", onEnd);
+    a.addEventListener("loadedmetadata", onLoaded);
+    return () => {
+      a.removeEventListener("timeupdate", onTime);
+      a.removeEventListener("ended", onEnd);
+      a.removeEventListener("loadedmetadata", onLoaded);
+    };
+  }, [url]);
+
   if (!url) {
     // Stub waveform — for old seed whispers without media URL
     return (
-      <div className="flex items-end gap-[2px] h-6 mb-3 opacity-70">
-        {heights.map((h, i) => (
+      <div className="flex items-end gap-[2px] h-7 mb-3 opacity-60">
+        {heights.current.map((h, i) => (
           <span key={i} className="bg-red/40 w-[3px]" style={{ height: `${h}px` }} />
         ))}
         {duration > 0 && (
@@ -531,9 +564,77 @@ function VoiceBlock({ url, duration }: { url: string | null; duration: number })
       </div>
     );
   }
+
+  const toggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const a = audioRef.current;
+    if (!a) return;
+    if (a.paused) {
+      a.play();
+      setPlaying(true);
+    } else {
+      a.pause();
+      setPlaying(false);
+    }
+  };
+
+  const scrub = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const a = audioRef.current;
+    if (!a || !a.duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    a.currentTime = Math.max(0, Math.min(1, ratio)) * a.duration;
+    setProgress(ratio);
+  };
+
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+  const elapsed = resolvedDuration ? Math.floor(progress * resolvedDuration) : 0;
+
   return (
     <div className="mb-3 flex items-center gap-3">
-      <audio controls src={url} className="w-full h-8" preload="metadata" />
+      <button
+        type="button"
+        onClick={toggle}
+        className="w-9 h-9 rounded-full bg-red text-paper flex items-center justify-center hover:bg-paper hover:text-red border border-red transition shrink-0"
+        aria-label={playing ? "Pause" : "Play"}
+      >
+        {playing ? (
+          <svg viewBox="0 0 12 12" width="12" height="12" fill="currentColor"><rect x="2" y="2" width="3" height="8" /><rect x="7" y="2" width="3" height="8" /></svg>
+        ) : (
+          <svg viewBox="0 0 12 12" width="12" height="12" fill="currentColor"><polygon points="3,2 10,6 3,10" /></svg>
+        )}
+      </button>
+      <div
+        className="flex-1 flex items-end gap-[2px] h-7 cursor-pointer"
+        onClick={scrub}
+        role="slider"
+        aria-label="Seek audio"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progress * 100)}
+        tabIndex={0}
+      >
+        {heights.current.map((h, i) => {
+          const barRatio = i / heights.current.length;
+          const past = barRatio <= progress;
+          return (
+            <span
+              key={i}
+              className={past ? "bg-red w-[3px]" : "bg-red/30 w-[3px]"}
+              style={{ height: `${h}px` }}
+            />
+          );
+        })}
+      </div>
+      <span className="mono-text text-[10px] text-muted shrink-0 tabular-nums">
+        {formatTime(elapsed)} / {formatTime(resolvedDuration || duration)}
+      </span>
+      <audio ref={audioRef} src={url} preload="metadata" className="hidden" />
     </div>
   );
 }
@@ -551,6 +652,7 @@ function ImageBlock({ url }: { url: string | null }) {
       alt="whisper attachment"
       className="w-full max-h-96 object-cover border border-line mb-3"
       loading="lazy"
+      decoding="async"
     />
   );
 }

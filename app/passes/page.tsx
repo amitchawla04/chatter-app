@@ -10,6 +10,7 @@ import { TabBar } from "@/components/TabBar";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { relativeTime } from "@/lib/whisper";
+import { getT } from "@/lib/i18n-server";
 
 export const revalidate = 15;
 
@@ -54,12 +55,13 @@ export default async function PassesPage() {
     .limit(40);
 
   const passes = (raw ?? []) as unknown as PassJoin[];
+  const { t } = await getT();
 
   return (
     <main className="min-h-screen pb-28">
       <header className="sticky top-0 z-40 bg-canvas/95 backdrop-blur border-b border-line px-5 py-4 flex items-center justify-between">
         <ChatterMark size="sm" />
-        <h1 className="display-italic text-xl text-ink">passes</h1>
+        <h1 className="display-italic text-xl text-ink">{t("passes.title")}</h1>
         <div className="w-4" />
       </header>
 
@@ -69,10 +71,10 @@ export default async function PassesPage() {
             <Send size={22} strokeWidth={1.3} className="text-muted" />
           </div>
           <h2 className="display-text text-2xl text-ink mb-3 max-w-md">
-            quiet here.
+            {t("passes.empty.heading")}
           </h2>
           <p className="body-text text-muted max-w-xs">
-            when someone passes a whisper to you, it lands here — just for you.
+            {t("passes.empty.body")}
           </p>
         </section>
       ) : (

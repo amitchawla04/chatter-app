@@ -84,8 +84,13 @@ export function WatchTogether({ eventId, isAuthed }: WatchTogetherProps) {
   const others = viewers.filter((v) => !v.is_self);
 
   return (
-    <div className="px-5 py-3 border-b border-line bg-paper flex items-center gap-3">
-      <span className="relative flex h-2.5 w-2.5">
+    <div
+      className="px-5 py-3 border-b border-line bg-paper flex items-center gap-3"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red opacity-60" />
         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red" />
       </span>

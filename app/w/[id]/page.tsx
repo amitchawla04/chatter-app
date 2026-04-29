@@ -56,6 +56,10 @@ export async function generateMetadata({
   const text = row.content_text?.trim() || `[${row.modality}]`;
   const description = text.length > 180 ? text.slice(0, 177) + "..." : text;
 
+  // Always prefer the dynamic OG image (renders the pull-quote) unless the
+  // whisper itself has a media URL, in which case use that for visual whispers.
+  const ogImage = row.content_media_url ?? `/api/og/whisper/${id}`;
+
   return {
     title: `${emoji} ${topic} · @${handle}${charter} · chatter`,
     description,
@@ -63,13 +67,13 @@ export async function generateMetadata({
       title: `${emoji} ${topic} · @${handle}${charter}`,
       description,
       type: "article",
-      images: row.content_media_url ? [row.content_media_url] : undefined,
+      images: [{ url: ogImage, width: 1200, height: 630 }],
     },
     twitter: {
-      card: row.content_media_url ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title: `${emoji} ${topic} · @${handle}${charter}`,
       description,
-      images: row.content_media_url ? [row.content_media_url] : undefined,
+      images: [ogImage],
     },
   };
 }

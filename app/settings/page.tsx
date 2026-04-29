@@ -18,6 +18,7 @@ import { ChatterMark } from "@/components/ChatterMark";
 import { TabBar } from "@/components/TabBar";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getT } from "@/lib/i18n-server";
 
 export default async function SettingsPage() {
   const supabase = await createServerClient();
@@ -33,34 +34,36 @@ export default async function SettingsPage() {
     .eq("id", user.id)
     .maybeSingle();
 
+  const { t } = await getT();
+
   const sections = [
     {
-      title: "account",
+      title: t("settings.section.account"),
       items: [
-        { href: "/settings/profile", icon: UserCog, label: "edit profile", sub: "name, bio, pronouns" },
-        { href: "/settings/account", icon: ScrollText, label: "account", sub: "email, pause, delete" },
+        { href: "/settings/profile", icon: UserCog, label: t("settings.item.edit_profile"), sub: "name, bio, pronouns" },
+        { href: "/settings/account", icon: ScrollText, label: t("settings.item.account"), sub: "email, pause, delete" },
       ],
     },
     {
-      title: "privacy & vibe",
+      title: t("settings.section.privacy_vibe"),
       items: [
-        { href: "/settings/privacy", icon: Shield, label: "privacy", sub: "blocked · muted · hidden words" },
-        { href: "/settings/notifications", icon: Bell, label: "notifications", sub: "what reaches you" },
-        { href: "/settings/language", icon: Languages, label: "language", sub: "en · es · pt · hi · fr · de" },
+        { href: "/settings/privacy", icon: Shield, label: t("settings.item.privacy"), sub: "blocked · muted · hidden words" },
+        { href: "/settings/notifications", icon: Bell, label: t("settings.item.notifications"), sub: "what reaches you" },
+        { href: "/settings/language", icon: Languages, label: t("settings.item.language"), sub: "en · es · pt · hi · fr · de" },
       ],
     },
     {
-      title: "your data",
+      title: t("settings.section.your_data"),
       items: [
-        { href: "/settings/data", icon: Database, label: "export & delete", sub: "your whispers · pact promise 2" },
+        { href: "/settings/data", icon: Database, label: t("settings.item.export_delete"), sub: "your whispers · pact promise 2" },
       ],
     },
     {
-      title: "the pact",
+      title: t("settings.section.the_pact"),
       items: [
-        { href: "/pact", icon: ScrollText, label: "the chatter pact", sub: "14 commitments" },
-        { href: "/privacy", icon: Shield, label: "privacy policy", sub: "plain-language summary" },
-        { href: "/settings/support", icon: HelpCircle, label: "help & support", sub: "FAQ · contact" },
+        { href: "/pact", icon: ScrollText, label: t("settings.item.pact"), sub: "14 commitments" },
+        { href: "/privacy", icon: Shield, label: t("settings.item.privacy_policy"), sub: "plain-language summary" },
+        { href: "/settings/support", icon: HelpCircle, label: t("settings.item.help"), sub: "FAQ · contact" },
       ],
     },
   ];
@@ -114,7 +117,7 @@ export default async function SettingsPage() {
           className="w-full flex items-center justify-center gap-2 px-5 py-5 text-warn text-sm hover:bg-paper transition-colors"
         >
           <LogOut size={16} strokeWidth={1.5} />
-          sign out
+          {t("auth.sign_out")}
         </button>
       </form>
 

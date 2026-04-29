@@ -25,6 +25,7 @@ import { postWhisper } from "@/app/compose/actions";
 import { uploadMedia } from "@/lib/upload-actions";
 import { VoiceRecorder } from "./VoiceRecorder";
 import { ImagePicker } from "./ImagePicker";
+import { useT } from "./I18nProvider";
 
 type Modality = "text" | "voice" | "image" | "video" | "breath";
 type Scope = "public" | "network" | "circle" | "private";
@@ -43,6 +44,7 @@ interface Props {
 
 export function ComposeForm({ topics, initialTopicId }: Props) {
   const router = useRouter();
+  const t = useT();
   const [modality, setModality] = useState<Modality>("text");
   const [scope, setScope] = useState<Scope>("public");
   const [topicId, setTopicId] = useState<string>(initialTopicId || topics[0]?.id || "");
@@ -148,7 +150,7 @@ export function ComposeForm({ topics, initialTopicId }: Props) {
           <X size={22} strokeWidth={1.5} />
         </button>
         <h1 className="display-text text-xl text-ink">
-          {isBreath ? "a breath" : "a whisper"}
+          {isBreath ? t("compose.header.breath") : t("compose.header.whisper")}
         </h1>
         <button
           type="submit"
@@ -156,14 +158,18 @@ export function ComposeForm({ topics, initialTopicId }: Props) {
           disabled={!canPost || pending}
           className="btn-primary px-6 py-2 text-sm"
         >
-          {pending ? "sending…" : isBreath ? "breathe" : "whisper"}
+          {pending
+            ? t("compose.cta.sending")
+            : isBreath
+              ? t("compose.cta.breath")
+              : t("compose.cta.whisper")}
         </button>
       </header>
 
       <form id="compose-form" onSubmit={submit} className="flex-1 p-5 space-y-6">
         {/* Topic chip row */}
         <div>
-          <label className="label-text text-muted mb-3 block">to</label>
+          <label className="label-text text-muted mb-3 block">{t("compose.section.to")}</label>
           <div className="flex flex-wrap gap-2">
             {topics.map((t) => (
               <button
@@ -328,7 +334,7 @@ export function ComposeForm({ topics, initialTopicId }: Props) {
 
         {/* Modality switcher — 5 modes including breath */}
         <div>
-          <label className="label-text text-muted mb-3 block">mode</label>
+          <label className="label-text text-muted mb-3 block">{t("compose.section.mode")}</label>
           <div className="flex items-center gap-2">
             <ModalityButton current={modality} value="text" icon={Type} onClick={setModality} label="text" />
             <ModalityButton current={modality} value="breath" icon={Wind} onClick={setModality} label="breath" />
@@ -338,7 +344,7 @@ export function ComposeForm({ topics, initialTopicId }: Props) {
           </div>
           {isBreath && (
             <p className="mt-2 mono-text text-[11px] text-gold">
-              breath · 60 chars · to your village only · disappears in 24h
+              {t("compose.breath.descriptor")}
             </p>
           )}
         </div>
@@ -346,7 +352,7 @@ export function ComposeForm({ topics, initialTopicId }: Props) {
         {/* Scope — who hears this (hidden when breath: auto-circle) */}
         {!isBreath && (
           <div className="pt-4 border-t border-line">
-            <label className="label-text text-muted mb-3 block">who hears this?</label>
+            <label className="label-text text-muted mb-3 block">{t("compose.section.scope")}</label>
             <div className="flex flex-wrap gap-2">
               {(
                 [
@@ -377,7 +383,7 @@ export function ComposeForm({ topics, initialTopicId }: Props) {
         {!isBreath && effectiveScope !== "public" && (
           <div className="pt-4 border-t border-line">
             <label className="label-text text-muted mb-3 block">
-              how long does this last?
+              {t("compose.section.ttl")}
             </label>
             <div className="flex flex-wrap gap-2">
               {(
@@ -399,9 +405,9 @@ export function ComposeForm({ topics, initialTopicId }: Props) {
               ))}
             </div>
             <p className="mt-2 mono-text text-[11px] text-muted">
-              {effectiveTtl === "permanent" && "stays forever. you can always delete it."}
-              {effectiveTtl === "24h" && "disappears 24h after posting. nothing archived."}
-              {effectiveTtl === "view_once" && "vanishes the moment someone reads it. one-and-done."}
+              {effectiveTtl === "permanent" && t("compose.ttl.permanent")}
+              {effectiveTtl === "24h" && t("compose.ttl.24h")}
+              {effectiveTtl === "view_once" && t("compose.ttl.viewonce")}
             </p>
           </div>
         )}
@@ -411,15 +417,15 @@ export function ComposeForm({ topics, initialTopicId }: Props) {
           <div className="pt-4 border-t border-line space-y-3">
             <ToggleRow
               icon={EyeOff}
-              label="mark as spoiler"
-              description="readers tap to reveal"
+              label={t("compose.spoiler.label")}
+              description={t("compose.spoiler.hint")}
               enabled={isSpoiler}
               onChange={setIsSpoiler}
             />
             <ToggleRow
               icon={ShieldAlert}
-              label="pre-approve replies"
-              description="replies go to your queue · your village doesn't see them until you approve"
+              label={t("compose.replyapproval.label")}
+              description={t("compose.replyapproval.hint")}
               enabled={requireReplyApproval}
               onChange={setRequireReplyApproval}
             />

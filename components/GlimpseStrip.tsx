@@ -56,9 +56,15 @@ export function GlimpseStrip({ glimpses }: GlimpseStripProps) {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={g.media_url}
-                    alt=""
+                    alt={
+                      g.caption
+                        ? `${g.caption} — by @${g.author_handle}`
+                        : `Glimpse from @${g.author_handle} in ${g.topic_name}`
+                    }
                     className="w-full h-full object-cover transition-transform group-hover:scale-105 group-active:scale-95"
-                    loading="lazy"
+                    loading={i < 3 ? "eager" : "lazy"}
+                    fetchPriority={i === 0 ? "high" : "auto"}
+                    decoding="async"
                   />
                   {g.topic_emoji && (
                     <span

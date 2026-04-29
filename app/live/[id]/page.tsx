@@ -52,11 +52,17 @@ export async function generateMetadata({
   const liveTag = e.status === "live" ? "🔴 LIVE · " : "";
   const title = `${liveTag}${e.title}${score} · chatter`;
   const description = e.subtitle ?? `live whispers from ${e.title}`;
+  const ogImage = `/api/og/event/${id}`;
   return {
     title,
     description,
-    openGraph: { title, description, type: "website" },
-    twitter: { card: "summary", title, description },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: [{ url: ogImage, width: 1200, height: 630 }],
+    },
+    twitter: { card: "summary_large_image", title, description, images: [ogImage] },
   };
 }
 

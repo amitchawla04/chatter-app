@@ -8,6 +8,17 @@ import Link from "next/link";
 import { ChatterMark } from "@/components/ChatterMark";
 import { BetaCodeForm } from "@/components/BetaCodeForm";
 
+export const metadata = {
+  title: "join the charter cohort · chatter",
+  description:
+    "redeem your charter invite code · founding members shape what chatter becomes.",
+  openGraph: {
+    title: "you have a charter invite to chatter",
+    description: "redeem your code · join the founding cohort.",
+    type: "website" as const,
+  },
+};
+
 export default function BetaOnboardPage() {
   return (
     <main className="min-h-screen flex flex-col">

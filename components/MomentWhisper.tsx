@@ -133,8 +133,14 @@ export function MomentWhisper({
 
       {open && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="moment-whisper-title"
           className="fixed inset-0 z-50 bg-ink/70 backdrop-blur-sm flex items-end sm:items-center justify-center px-4"
           onClick={close}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") close();
+          }}
         >
           <form
             onSubmit={submit}
@@ -149,7 +155,11 @@ export function MomentWhisper({
                   )}
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red" />
                 </span>
-                <span className="mono-text text-[10px] uppercase tracking-wider text-red">
+                <span
+                  id="moment-whisper-title"
+                  className="mono-text text-[10px] uppercase tracking-wider text-red"
+                  aria-live="polite"
+                >
                   {autoTriggered && secondsLeft !== null && secondsLeft > 0
                     ? `score changed · ${secondsLeft}s to react`
                     : status === "live"

@@ -106,15 +106,30 @@ export function GlimpseLightbox({
     };
   }, [onClose, next, prev]);
 
-  // Tap-and-hold to pause
-  const onPointerDown = () => {
+  // Tap-and-hold to pause + swipe-down to dismiss
+  const swipeStartY = useRef<number | null>(null);
+  const swipeDistY = useRef<number>(0);
+  const onPointerDown = (e?: React.PointerEvent) => {
     elapsedAtPauseRef.current += Date.now() - startRef.current;
     setPaused(true);
+    swipeStartY.current = e?.clientY ?? null;
+    swipeDistY.current = 0;
   };
   const onPointerUp = () => {
+    // Swipe-down dismiss: if dragged down >100px, close
+    if (swipeDistY.current > 100) {
+      onClose();
+      return;
+    }
     if (!paused) return;
     startRef.current = Date.now();
     setPaused(false);
+    swipeStartY.current = null;
+    swipeDistY.current = 0;
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (swipeStartY.current === null) return;
+    swipeDistY.current = e.clientY - swipeStartY.current;
   };
 
   // Tap-edge navigation (left third = prev, right two-thirds = next)
@@ -177,12 +192,13 @@ export function GlimpseLightbox({
       </div>
 
       <div
-        className="flex-1 flex items-center justify-center px-5 relative select-none"
+        className="flex-1 flex flex-col items-center justify-center px-5 relative select-none"
         onClick={(e) => {
           e.stopPropagation();
           onTap(e);
         }}
         onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         onPointerLeave={onPointerUp}
@@ -190,10 +206,22 @@ export function GlimpseLightbox({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={current.media_url}
-          alt={`Glimpse from @${current.author_handle} in ${current.topic_name}`}
-          className="max-w-full max-h-[70vh] object-contain pointer-events-none"
+          alt={
+            current.caption
+              ? `${current.caption} — by @${current.author_handle}`
+              : `Glimpse from @${current.author_handle} in ${current.topic_name}`
+          }
+          className="max-w-full max-h-[60vh] object-contain pointer-events-none"
           draggable={false}
         />
+        {current.caption && (
+          <p
+            className="mt-4 max-w-md text-center display-italic text-paper text-lg leading-snug px-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            &ldquo;{current.caption}&rdquo;
+          </p>
+        )}
       </div>
 
       <div

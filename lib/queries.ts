@@ -132,6 +132,7 @@ export type GlimpseRow = {
   author_handle: string;
   author_is_charter: boolean;
   created_at: string;
+  caption: string | null;
 };
 
 /**
@@ -144,7 +145,7 @@ export async function fetchGlimpseImages(limit = 12): Promise<GlimpseRow[]> {
   const { data, error } = await admin
     .from("whispers")
     .select(`
-      id, content_media_url, created_at, topic_id, author_id, scope,
+      id, content_media_url, content_text, created_at, topic_id, author_id, scope,
       users:author_id ( handle, is_charter ),
       topics:topic_id ( name, emoji )
     `)
@@ -164,6 +165,7 @@ export async function fetchGlimpseImages(limit = 12): Promise<GlimpseRow[]> {
   type Row = {
     id: string;
     content_media_url: string | null;
+    content_text: string | null;
     created_at: string;
     topic_id: string;
     author_id: string;
@@ -189,6 +191,7 @@ export async function fetchGlimpseImages(limit = 12): Promise<GlimpseRow[]> {
       author_handle: r.users.handle,
       author_is_charter: Boolean(r.users.is_charter),
       created_at: r.created_at,
+      caption: r.content_text,
     });
     if (out.length >= limit) break;
   }

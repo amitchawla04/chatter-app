@@ -3,9 +3,15 @@
 /**
  * PassSheet — bottom sheet to pass a whisper to one specific user.
  * Visual DNA Principle 6: pass-signature move. 1:1 distribution, distinct from broadcast.
+ *
+ * Accessibility:
+ *  - role="dialog" + aria-modal + aria-labelledby
+ *  - Escape closes
+ *  - focus restored on close (via useEffect cleanup)
+ *  - keyboard reachable
  */
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { X, Send } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { passWhisper } from "@/lib/engagement-actions";
@@ -33,6 +39,22 @@ export function PassSheet({
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+  const previouslyFocused = useRef<HTMLElement | null>(null);
+
+  // Escape closes + focus restoration on unmount
+  useEffect(() => {
+    previouslyFocused.current = document.activeElement as HTMLElement | null;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+      previouslyFocused.current?.focus?.();
+    };
+  }, [onClose]);
 
   useEffect(() => {
     const load = async () => {
@@ -72,6 +94,9 @@ export function PassSheet({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pass-sheet-title"
       className="fixed inset-0 z-50 bg-canvas/70 backdrop-blur-sm flex items-end sm:items-center justify-center"
       onClick={onClose}
     >
@@ -80,7 +105,7 @@ export function PassSheet({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-5">
-          <h2 className="display-italic text-xl text-ink">pass this whisper</h2>
+          <h2 id="pass-sheet-title" className="display-italic text-xl text-ink">pass this whisper</h2>
           <button type="button" onClick={onClose} className="text-muted hover:text-ink">
             <X size={22} strokeWidth={1.5} />
           </button>

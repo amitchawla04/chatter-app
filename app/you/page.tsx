@@ -148,14 +148,14 @@ export default async function YouPage() {
       <section className="pb-8">
         {whispers.length === 0 ? (
           <p className="py-16 text-center text-muted text-sm">
-            Your whispers will appear here.
+            {t("you.your_whispers_empty")}
           </p>
         ) : (
           whispers.map((w) => (
             <WhisperCard
               key={w.id}
               whisper={w}
-              rankingRule="your whisper"
+              rankingRule={t("you.ranking.your_whisper")}
               isAuthed={true}
             />
           ))
