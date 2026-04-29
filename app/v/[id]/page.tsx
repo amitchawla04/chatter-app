@@ -12,6 +12,7 @@ import { fetchThreadDetail, fetchCurrentUserRow } from "@/lib/queries";
 import { relativeTime } from "@/lib/whisper";
 import { leaveThread, markThreadRead } from "@/lib/thread-actions";
 import { ThreadCreatorTools } from "@/components/ThreadCreatorTools";
+import { ThreadPresence } from "@/components/ThreadPresence";
 
 export const revalidate = 0;
 
@@ -98,6 +99,9 @@ export default async function ThreadDetailPage({
           ))}
         </ul>
       </section>
+
+      {/* Realtime presence — who is in the room right now */}
+      <ThreadPresence threadId={id} currentUserHandle={me.handle as string} currentUserId={me.id as string} />
 
       {/* Pinned message strip — creator-pinned context */}
       {detail.pinned_message && (

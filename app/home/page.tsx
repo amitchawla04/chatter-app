@@ -15,6 +15,7 @@ import { WhisperCard } from "@/components/WhisperCard";
 import { HomeFilter } from "@/components/HomeFilter";
 import { TopicRail, type TopicRailItem } from "@/components/TopicRail";
 import { GlimpseStrip } from "@/components/GlimpseStrip";
+import { LiveWhispersPulse } from "@/components/LiveWhispersPulse";
 import { OpeningMoment } from "@/components/OpeningMoment";
 import {
   fetchPublicWhispers,
@@ -111,6 +112,9 @@ export default async function HomePage({
       <div className="px-5 pt-5 pb-3">
         <HomeFilter current={filter} />
       </div>
+
+      {/* Real-time pulse — Supabase Realtime subscription, only fires when new public whispers land */}
+      <LiveWhispersPulse excludeAuthorIds={currentUser ? [currentUser.id] : []} />
 
       {/* Feed */}
       <section className="pb-8">

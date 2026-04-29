@@ -11,6 +11,7 @@ import { TabBar } from "@/components/TabBar";
 import { WhisperCard } from "@/components/WhisperCard";
 import { TuneInButton } from "@/components/TuneInButton";
 import { VouchesPanel } from "@/components/VouchesPanel";
+import { LiveWhispersPulse } from "@/components/LiveWhispersPulse";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { fetchTopicWhispers, fetchEchoedIds, fetchSavedIds } from "@/lib/queries";
@@ -128,6 +129,9 @@ export default async function TopicPage({
 
       {/* Vouches strip — credentialed expertise statements per topic */}
       <VouchesPanel topicId={id} topicName={topic.name} isAuthed={isAuthed} />
+
+      {/* Real-time pulse — fires when a new whisper lands on this topic */}
+      <LiveWhispersPulse topicId={id} excludeAuthorIds={user ? [user.id] : []} />
 
       <section className="pb-8">
         {whispers.length === 0 ? (
