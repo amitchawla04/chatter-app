@@ -100,7 +100,7 @@ export async function createThread(params: {
             to: email,
             fromHandle: creatorHandle,
             threadName: name,
-            threadUrl: `https://chatter-ten-lemon.vercel.app/v/${thread.id}`,
+            threadUrl: `https://chatter.today/v/${thread.id}`,
             topicName,
           }).catch(() => {});
         }
@@ -226,7 +226,7 @@ export async function inviteToThread(params: { threadId: string; handle: string 
       to: targetEmail,
       fromHandle: inviterHandle,
       threadName,
-      threadUrl: `https://chatter-ten-lemon.vercel.app/v/${params.threadId}`,
+      threadUrl: `https://chatter.today/v/${params.threadId}`,
       topicName: threadRow?.topics?.name ?? "a topic",
     }).catch(() => {});
   }

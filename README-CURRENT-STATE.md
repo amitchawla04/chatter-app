@@ -1,11 +1,11 @@
 # Chatter App — All 12 Phases ✅ + 5 P2/P3 Gaps Closed · Launch-Ready
 
-**Live:** https://chatter-ten-lemon.vercel.app · open in iPhone Safari → Add to Home Screen
+**Live:** https://chatter.today · open in iPhone Safari → Add to Home Screen
 **Supabase:** `kpgsrntbmzdqvspcyekf` · 19 tables · RLS clean · 0 ERROR-level lints
 **Vercel:** `prj_E3s6el4uszNdb2npSgYNo1nGdsQA` · auto-deploy on push
 
 **Founder bypass URL (no email needed):**
-https://chatter-ten-lemon.vercel.app/auth/bypass?email=amit.chawla@reward360.co&s=dbeb3e4645f58dc80e7cb0dc6b562a7b
+https://chatter.today/auth/bypass?email=amit.chawla@reward360.co&s=dbeb3e4645f58dc80e7cb0dc6b562a7b
 
 ---
 
@@ -84,7 +84,7 @@ White-mode entertainment register · warm canvas (`#FAF9F6`) · near-black ink �
 
 ## How to test on your phone
 
-1. Open `https://chatter-ten-lemon.vercel.app` in iPhone **Safari**
+1. Open `https://chatter.today` in iPhone **Safari**
 2. Tap **Share → Add to Home Screen**
 3. Use bypass URL above OR sign in via OTP
 4. Try the new surfaces:

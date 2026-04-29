@@ -9,7 +9,7 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
 
   use: {
-    baseURL: "https://chatter-ten-lemon.vercel.app",
+    baseURL: "https://chatter.today",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     actionTimeout: 15000,

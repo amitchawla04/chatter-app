@@ -103,7 +103,7 @@ export async function submitCorrection(params: {
         insiderHandle,
         insiderTag,
         correctionText: content,
-        whisperUrl: `https://chatter-ten-lemon.vercel.app/w/${params.whisperId}`,
+        whisperUrl: `https://chatter.today/w/${params.whisperId}`,
       }).catch(() => {});
     }
   }

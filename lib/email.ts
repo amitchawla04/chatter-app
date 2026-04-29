@@ -29,7 +29,7 @@ function getResend(): Resend | null {
 const FROM = (process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev").trim();
 const BRAND = "chatter";
 const BRAND_FROM = `${BRAND} <${FROM}>`;
-const SITE = "https://chatter-ten-lemon.vercel.app";
+const SITE = "https://chatter.today";
 
 interface SendResult {
   ok: boolean;

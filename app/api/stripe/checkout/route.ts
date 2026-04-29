@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const SITE = "https://chatter-ten-lemon.vercel.app";
+  const SITE = "https://chatter.today";
   const result = await createTicketedSpaceCheckout({
     eventId: (event as { id: string }).id,
     eventTitle: (event as { title: string }).title,

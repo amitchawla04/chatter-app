@@ -48,7 +48,7 @@ export async function refreshScoreboard(league: keyof typeof SCOREBOARDS): Promi
   try {
     const res = await fetch(url, {
       next: { revalidate: 60 },
-      headers: { "User-Agent": "Chatter/1.0 (+https://chatter-ten-lemon.vercel.app)" },
+      headers: { "User-Agent": "Chatter/1.0 (+https://chatter.today)" },
     });
     if (!res.ok) return { events_seen: 0, events_updated: 0 };
     body = await res.json();

@@ -15,7 +15,7 @@ import {
 } from "@/lib/email";
 
 const BYPASS_SECRET = process.env.BYPASS_SECRET ?? "chatter-2026-04-28-temp";
-const SITE = "https://chatter-ten-lemon.vercel.app";
+const SITE = "https://chatter.today";
 
 export async function POST(req: Request) {
   const url = new URL(req.url);

@@ -1,7 +1,7 @@
 /**
  * Founder bypass route — temporary, for testing while real email provider is wired.
  * Visit:
- *   https://chatter-ten-lemon.vercel.app/auth/bypass?email=YOUR_EMAIL&s=BYPASS_SECRET
+ *   https://chatter.today/auth/bypass?email=YOUR_EMAIL&s=BYPASS_SECRET
  * The route generates a server-side session for that email + redirects to onboarding.
  *
  * This bypasses Supabase email entirely — no rate limit, no spam folder.

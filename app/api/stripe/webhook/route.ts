@@ -3,7 +3,7 @@
  * Handles: checkout.session.completed, payment_intent.succeeded, account.updated.
  *
  * Configure at: https://dashboard.stripe.com/test/webhooks → Add endpoint
- *   URL: https://chatter-ten-lemon.vercel.app/api/stripe/webhook
+ *   URL: https://chatter.today/api/stripe/webhook
  *   Events: checkout.session.completed · payment_intent.succeeded · account.updated
  *   Copy the "Signing secret" → set STRIPE_WEBHOOK_SECRET in Vercel env.
  */

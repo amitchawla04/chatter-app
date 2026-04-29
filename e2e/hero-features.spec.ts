@@ -4,7 +4,7 @@
  */
 import { test, expect } from "@playwright/test";
 
-const BASE = "https://chatter-ten-lemon.vercel.app";
+const BASE = "https://chatter.today";
 const SECRET = process.env.BYPASS_SECRET ?? "dbeb3e4645f58dc80e7cb0dc6b562a7b";
 const FOUNDER_EMAIL = "amit.chawla@reward360.co";
 const FOUNDER_BYPASS = `${BASE}/auth/bypass?email=${encodeURIComponent(FOUNDER_EMAIL)}&s=${SECRET}`;

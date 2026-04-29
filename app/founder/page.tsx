@@ -415,12 +415,12 @@ export default async function FounderDashboard() {
           <div className="border border-line p-3">
             <div className="text-muted mb-1">live URL</div>
             <a
-              href="https://chatter-ten-lemon.vercel.app"
+              href="https://chatter.today"
               target="_blank"
               rel="noreferrer"
               className="text-red hover:text-ink transition"
             >
-              chatter-ten-lemon.vercel.app
+              chatter.today
             </a>
           </div>
           <div className="border border-line p-3">

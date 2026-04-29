@@ -165,7 +165,7 @@ export async function passWhisper(params: {
       fromHandle,
       whisperExcerpt: excerpt,
       note: params.note,
-      whisperUrl: `https://chatter-ten-lemon.vercel.app/w/${params.whisperId}`,
+      whisperUrl: `https://chatter.today/w/${params.whisperId}`,
     }).catch(() => {});
   }
 

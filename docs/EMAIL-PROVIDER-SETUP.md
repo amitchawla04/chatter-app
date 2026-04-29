@@ -44,7 +44,7 @@ Same page → **Rate Limits** section:
 - Save
 
 ### 6. Test
-- Open `https://chatter-ten-lemon.vercel.app/auth/sign-in` in private browser
+- Open `https://chatter.today/auth/sign-in` in private browser
 - Type any test email → should arrive in 5-10 seconds with Chatter as sender, OTP visible
 
 That's it. Email rate-limit issue solved permanently.

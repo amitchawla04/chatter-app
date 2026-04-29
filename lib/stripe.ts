@@ -26,7 +26,7 @@ export function getStripe(): Stripe {
     typescript: true,
     appInfo: {
       name: "Chatter",
-      url: "https://chatter-ten-lemon.vercel.app",
+      url: "https://chatter.today",
     },
   });
   return _stripe;

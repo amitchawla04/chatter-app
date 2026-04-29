@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const BASE = "https://chatter-ten-lemon.vercel.app";
+const BASE = "https://chatter.today";
 const BYPASS_URL = `${BASE}/auth/bypass?email=playwright-test@chatter-test.dev&s=${process.env.BYPASS_SECRET ?? "dbeb3e4645f58dc80e7cb0dc6b562a7b"}`;
 
 test.describe("Chatter — public surfaces", () => {

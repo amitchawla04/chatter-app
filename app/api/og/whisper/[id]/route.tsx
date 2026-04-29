@@ -160,7 +160,7 @@ export async function GET(
           }}
         >
           <span>whispers from people who actually know</span>
-          <span style={{ color: "#FF2D2D" }}>chatter-ten-lemon.vercel.app</span>
+          <span style={{ color: "#FF2D2D" }}>chatter.today</span>
         </div>
       </div>
     ),

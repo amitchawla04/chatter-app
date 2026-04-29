@@ -129,7 +129,7 @@ export async function GET(
           <span>
             {t.tuned_in_count ?? 0} tuned in · {whisperCount ?? 0} whispers
           </span>
-          <span style={{ color: "#FF2D2D" }}>chatter-ten-lemon.vercel.app</span>
+          <span style={{ color: "#FF2D2D" }}>chatter.today</span>
         </div>
       </div>
     ),
