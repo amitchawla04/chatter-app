@@ -16,7 +16,7 @@ import { useState, useTransition, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useTransform, type PanInfo } from "framer-motion";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Ban, Flag } from "lucide-react";
 import { EchoGlyph, PassGlyph, SaveGlyph } from "./icons/ChatterIcons";
 import {
   bestInsiderCredential,
@@ -24,6 +24,7 @@ import {
   type WhisperRow,
 } from "@/lib/whisper";
 import { toggleEcho, toggleSave } from "@/lib/engagement-actions";
+import { blockUser } from "@/lib/trust-actions";
 import { PassSheet } from "./PassSheet";
 import { CharterBadge } from "./CharterBadge";
 
@@ -138,6 +139,8 @@ export function WhisperCard({
   // Long-press whisper-back — third gesture (after swipe-pass and double-tap-echo)
   // Hold for 600ms without moving > 8px → opens an in-card mini-composer.
   const [replyOpen, setReplyOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const longPressTimer = useRef<number | null>(null);
   const longPressOrigin = useRef<{ x: number; y: number } | null>(null);
   const longPressFired = useRef<boolean>(false);
@@ -192,6 +195,14 @@ export function WhisperCard({
     }
     handleDoubleTap();
   };
+
+  if (hidden) {
+    return (
+      <div className="px-5 py-4 border-b border-line text-center">
+        <p className="mono-text text-[11px] text-muted">whisper hidden</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -380,14 +391,74 @@ export function WhisperCard({
           >
             <SaveGlyph size={16} strokeWidth={1.6} filled={saved} />
           </button>
-          <button
-            type="button"
-            onClick={(e) => e.stopPropagation()}
-            className="ml-auto text-muted hover:text-ink transition-colors"
-            aria-label="More"
-          >
-            <MoreHorizontal size={16} strokeWidth={1.5} />
-          </button>
+          <div className="ml-auto relative">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setMenuOpen((v) => !v);
+              }}
+              className="text-muted hover:text-ink transition-colors"
+              aria-label="More"
+              aria-expanded={menuOpen}
+            >
+              <MoreHorizontal size={16} strokeWidth={1.5} />
+            </button>
+            {menuOpen && (
+              <>
+                <button
+                  type="button"
+                  className="fixed inset-0 z-30"
+                  aria-label="close menu"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpen(false);
+                  }}
+                />
+                <div
+                  className="absolute right-0 top-full mt-1 z-40 min-w-[160px] bg-canvas border border-line shadow-sm py-1 mono-text text-xs"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setHidden(true);
+                    }}
+                    className="w-full text-left px-3 py-2 hover:bg-paper text-ink flex items-center gap-2"
+                  >
+                    <span className="w-3.5">→</span>
+                    <span>Hide this whisper</span>
+                  </button>
+                  {isAuthed && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!confirm(`Block @${whisper.author.handle}? You won't see their whispers anywhere.`)) return;
+                        startTransition(async () => {
+                          await blockUser(whisper.author_id);
+                          setMenuOpen(false);
+                          setHidden(true);
+                        });
+                      }}
+                      className="w-full text-left px-3 py-2 hover:bg-paper text-ink flex items-center gap-2"
+                    >
+                      <Ban size={12} strokeWidth={1.5} />
+                      <span>Block @{whisper.author.handle}</span>
+                    </button>
+                  )}
+                  <Link
+                    href={`/w/${whisper.id}#report`}
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-3 py-2 hover:bg-paper text-ink flex items-center gap-2"
+                  >
+                    <Flag size={12} strokeWidth={1.5} />
+                    <span>Report</span>
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </motion.article>
 

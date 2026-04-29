@@ -13,6 +13,43 @@ import {
 } from "@/lib/whisper";
 
 /**
+ * Fetch the current user's trust filters: blocked author IDs + hidden words.
+ * Returns empty sets/arrays when anonymous (no filtering needed).
+ */
+export async function fetchTrustFilters(): Promise<{ blockedIds: Set<string>; hiddenWords: string[] }> {
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { blockedIds: new Set(), hiddenWords: [] };
+
+  const admin = createAdminClient();
+  const [{ data: blocks }, { data: hidden }] = await Promise.all([
+    admin.from("blocks").select("blocked_id").eq("blocker_id", user.id),
+    admin.from("hidden_words").select("word").eq("user_id", user.id),
+  ]);
+  return {
+    blockedIds: new Set((blocks ?? []).map((b) => (b as { blocked_id: string }).blocked_id)),
+    hiddenWords: (hidden ?? []).map((h) => (h as { word: string }).word.toLowerCase()),
+  };
+}
+
+function applyTrustFilters<T extends WhisperRow>(
+  rows: T[],
+  filters: { blockedIds: Set<string>; hiddenWords: string[] },
+): T[] {
+  if (filters.blockedIds.size === 0 && filters.hiddenWords.length === 0) return rows;
+  return rows.filter((w) => {
+    if (filters.blockedIds.has(w.author_id)) return false;
+    if (filters.hiddenWords.length > 0) {
+      const haystack = `${w.content_text ?? ""} ${w.content_transcript ?? ""}`.toLowerCase();
+      if (filters.hiddenWords.some((word) => haystack.includes(word))) return false;
+    }
+    return true;
+  });
+}
+
+/**
  * Fetch public whispers for the home feed.
  */
 export async function fetchPublicWhispers(limit = 40): Promise<WhisperRow[]> {
@@ -35,7 +72,8 @@ export async function fetchPublicWhispers(limit = 40): Promise<WhisperRow[]> {
     return [];
   }
 
-  return ((data ?? []) as unknown as WhisperJoinRow[]).map(joinRowToWhisperRow);
+  const rows = ((data ?? []) as unknown as WhisperJoinRow[]).map(joinRowToWhisperRow);
+  return applyTrustFilters(rows, await fetchTrustFilters());
 }
 
 export async function fetchTopicWhispers(
@@ -62,7 +100,8 @@ export async function fetchTopicWhispers(
     return [];
   }
 
-  return ((data ?? []) as unknown as WhisperJoinRow[]).map(joinRowToWhisperRow);
+  const rows = ((data ?? []) as unknown as WhisperJoinRow[]).map(joinRowToWhisperRow);
+  return applyTrustFilters(rows, await fetchTrustFilters());
 }
 
 export async function fetchTopicBySlug(slug: string) {
