@@ -3,9 +3,10 @@
  * Match Day · Awards · Premiere · Breaking News themes (kind enum dispatches register).
  * Hero score/title + event timeline + topic-scoped whisper feed + sticky composer.
  */
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Trophy, Tv, Newspaper, Mic2, PenLine } from "lucide-react";
+import { Trophy, Tv, Newspaper, Mic2 } from "lucide-react";
 import { ChatterMark } from "@/components/ChatterMark";
 import { TabBar } from "@/components/TabBar";
 import { WhisperCard } from "@/components/WhisperCard";
@@ -17,6 +18,47 @@ import { fetchTopicWhispers, fetchEchoedIds, fetchSavedIds } from "@/lib/queries
 import { relativeTime } from "@/lib/whisper";
 
 export const revalidate = 10;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("live_events")
+    .select("title, subtitle, status, home_label, away_label, home_score, away_score, minute_label, kind")
+    .eq("id", id)
+    .maybeSingle();
+  if (!data) {
+    return { title: "event not found · chatter" };
+  }
+  const e = data as {
+    title: string;
+    subtitle: string | null;
+    status: string;
+    home_label: string | null;
+    away_label: string | null;
+    home_score: number | null;
+    away_score: number | null;
+    minute_label: string | null;
+    kind: string;
+  };
+  const score =
+    e.kind === "match" && e.home_score !== null && e.away_score !== null
+      ? ` · ${e.home_label} ${e.home_score} — ${e.away_score} ${e.away_label}${e.minute_label ? ` · ${e.minute_label}` : ""}`
+      : "";
+  const liveTag = e.status === "live" ? "🔴 LIVE · " : "";
+  const title = `${liveTag}${e.title}${score} · chatter`;
+  const description = e.subtitle ?? `live whispers from ${e.title}`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "website" },
+    twitter: { card: "summary", title, description },
+  };
+}
 
 interface LiveEvent {
   id: string;

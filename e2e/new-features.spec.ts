@@ -18,7 +18,7 @@ test.describe("Glimpse strip on /home", () => {
     await expect(page.getByText("24h", { exact: true }).first()).toBeVisible();
 
     // At least 5 circles (lazy-loaded images inside circles)
-    const circles = page.locator('img[src*="picsum.photos"]');
+    const circles = page.locator('img[src*="images.unsplash.com"]');
     await expect(circles.first()).toBeVisible();
     expect(await circles.count()).toBeGreaterThanOrEqual(5);
   });
@@ -64,16 +64,16 @@ test.describe("Credential-weighted reply ranking on /w/[id]", () => {
 
     // Replies seeded: chronological = [amit, copafever, ashburton89, setpiecestan, touchlineban, lamasia]
     // After credential-weighted sort:
-    //   charter first (chronological within tier): ashburton89, setpiecestan, lamasia
+    //   charter first (chronological within tier): amit, ashburton89, setpiecestan, lamasia
+    //     (@amit is also charter as the founder)
     //   then insider non-charter (chronological): copafever, touchlineban
-    //   then no creds: amit
     const expected = [
+      "amit",
       "ashburton89",
       "setpiecestan",
       "lamasia",
       "copafever",
       "touchlineban",
-      "amit",
     ];
 
     // Parent author's byline appears first; the last 6 handle occurrences are the replies in render order

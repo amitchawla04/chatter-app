@@ -55,7 +55,7 @@ export default async function YouPage() {
   const { data: raw } = await admin
     .from("whispers")
     .select(`
-      id, author_id, topic_id, modality, content_text, content_transcript,
+      id, author_id, topic_id, modality, content_text, content_transcript, content_media_url,
       content_duration_sec, scope, kind, is_whisper_tier,
       echo_count, pass_count, corroboration_count, created_at,
       users:author_id ( handle, display_name, insider_tags, trust_score, is_charter ),

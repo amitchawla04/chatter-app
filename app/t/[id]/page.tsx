@@ -2,6 +2,7 @@
  * Topic page — /t/{topicId}
  * Shows topic hero + topic-scoped whisper feed.
  */
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PenLine } from "lucide-react";
@@ -15,6 +16,34 @@ import { fetchTopicWhispers, fetchEchoedIds, fetchSavedIds } from "@/lib/queries
 import { topicTint } from "@/lib/topic-tint";
 
 export const revalidate = 30;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("topics")
+    .select("name, emoji, description, tuned_in_count")
+    .eq("id", id)
+    .maybeSingle();
+  if (!data) {
+    return { title: "topic not found · chatter" };
+  }
+  const t = data as { name: string; emoji: string | null; description: string | null; tuned_in_count: number | null };
+  const title = `${t.emoji ?? "·"} ${t.name} · chatter`;
+  const description =
+    t.description ??
+    `whispers about ${t.name} from people who actually know · ${t.tuned_in_count ?? 0} tuned in`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "website" },
+    twitter: { card: "summary", title, description },
+  };
+}
 
 export default async function TopicPage({
   params,

@@ -246,12 +246,12 @@ export function WhisperCard({
 
         {whisper.modality === "voice" && (
           <VoiceBlock
-            url={(whisper as unknown as { content_media_url?: string | null }).content_media_url ?? null}
+            url={whisper.content_media_url}
             duration={whisper.content_duration_sec ?? 0}
           />
         )}
         {whisper.modality === "image" && (
-          <ImageBlock url={(whisper as unknown as { content_media_url?: string | null }).content_media_url ?? null} />
+          <ImageBlock url={whisper.content_media_url} />
         )}
 
         {/* Pull-quote body with optional spoiler mask + correction-induced reset */}
@@ -539,12 +539,10 @@ function VoiceBlock({ url, duration }: { url: string | null; duration: number })
 }
 
 function ImageBlock({ url }: { url: string | null }) {
-  if (!url) {
-    return (
-      <div className="aspect-[4/3] bg-canvas border border-line mb-3 flex items-center justify-center text-muted text-xs mono-text">
-        [image preview]
-      </div>
-    );
+  if (!url || !url.startsWith("http")) {
+    // No image attached or seed-placeholder URL — render nothing rather than show
+    // a broken/empty preview frame.
+    return null;
   }
   return (
     /* eslint-disable-next-line @next/next/no-img-element */

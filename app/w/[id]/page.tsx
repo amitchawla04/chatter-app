@@ -2,6 +2,7 @@
  * Whisper detail — `/w/{id}`
  * Parent whisper + replies thread + reply composer + insider-correction strip.
  */
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ChatterMark } from "@/components/ChatterMark";
@@ -21,6 +22,58 @@ import { fetchEchoedIds, fetchSavedIds } from "@/lib/queries";
 
 export const revalidate = 15;
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("whispers")
+    .select(
+      "content_text, content_media_url, modality, users:author_id(handle, is_charter), topics:topic_id(name, emoji)",
+    )
+    .eq("id", id)
+    .maybeSingle();
+  if (!data) {
+    return {
+      title: "whisper not found · chatter",
+      description: "this whisper doesn't exist or has vanished.",
+    };
+  }
+  const row = data as unknown as {
+    content_text: string | null;
+    content_media_url: string | null;
+    modality: string;
+    users: { handle: string; is_charter: boolean | null } | null;
+    topics: { name: string; emoji: string | null } | null;
+  };
+  const handle = row.users?.handle ?? "someone";
+  const charter = row.users?.is_charter ? " ✦" : "";
+  const topic = row.topics?.name ?? "chatter";
+  const emoji = row.topics?.emoji ?? "🤫";
+  const text = row.content_text?.trim() || `[${row.modality}]`;
+  const description = text.length > 180 ? text.slice(0, 177) + "..." : text;
+
+  return {
+    title: `${emoji} ${topic} · @${handle}${charter} · chatter`,
+    description,
+    openGraph: {
+      title: `${emoji} ${topic} · @${handle}${charter}`,
+      description,
+      type: "article",
+      images: row.content_media_url ? [row.content_media_url] : undefined,
+    },
+    twitter: {
+      card: row.content_media_url ? "summary_large_image" : "summary",
+      title: `${emoji} ${topic} · @${handle}${charter}`,
+      description,
+      images: row.content_media_url ? [row.content_media_url] : undefined,
+    },
+  };
+}
+
 export default async function WhisperDetailPage({
   params,
 }: {
@@ -32,7 +85,7 @@ export default async function WhisperDetailPage({
   const { data: raw } = await admin
     .from("whispers")
     .select(`
-      id, author_id, topic_id, modality, content_text, content_transcript,
+      id, author_id, topic_id, modality, content_text, content_transcript, content_media_url,
       content_duration_sec, scope, kind, is_whisper_tier, is_spoiler, is_breath,
       require_reply_approval, ttl, expires_at, deleted_at,
       echo_count, pass_count, corroboration_count, created_at,
@@ -53,7 +106,7 @@ export default async function WhisperDetailPage({
   const { data: replyRaw } = await admin
     .from("whispers")
     .select(`
-      id, author_id, topic_id, modality, content_text, content_transcript,
+      id, author_id, topic_id, modality, content_text, content_transcript, content_media_url,
       content_duration_sec, scope, kind, is_whisper_tier, hidden_by_author_at,
       echo_count, pass_count, corroboration_count, created_at,
       users:author_id ( handle, display_name, insider_tags, trust_score, is_charter ),

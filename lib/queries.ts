@@ -20,8 +20,7 @@ export async function fetchPublicWhispers(limit = 40): Promise<WhisperRow[]> {
   const { data, error } = await supabase
     .from("whispers")
     .select(`
-      id, author_id, topic_id, modality, content_text, content_transcript,
-      content_duration_sec, scope, kind, is_whisper_tier,
+      id, author_id, topic_id, modality, content_text, content_transcript, content_media_url, content_duration_sec, scope, kind, is_whisper_tier,
       echo_count, pass_count, corroboration_count, created_at,
       users:author_id ( handle, display_name, insider_tags, trust_score, is_charter ),
       topics:topic_id ( id, name, emoji, type )
@@ -47,8 +46,7 @@ export async function fetchTopicWhispers(
   const { data, error } = await supabase
     .from("whispers")
     .select(`
-      id, author_id, topic_id, modality, content_text, content_transcript,
-      content_duration_sec, scope, kind, is_whisper_tier,
+      id, author_id, topic_id, modality, content_text, content_transcript, content_media_url, content_duration_sec, scope, kind, is_whisper_tier,
       echo_count, pass_count, corroboration_count, created_at,
       users:author_id ( handle, display_name, insider_tags, trust_score, is_charter ),
       topics:topic_id ( id, name, emoji, type )

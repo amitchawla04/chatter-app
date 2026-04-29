@@ -11,6 +11,7 @@ export type WhisperRow = {
   modality: "text" | "voice" | "image" | "video";
   content_text: string | null;
   content_transcript: string | null;
+  content_media_url: string | null;
   content_duration_sec: number | null;
   scope: "private" | "circle" | "network" | "public";
   kind: "fact" | "opinion";
@@ -50,6 +51,7 @@ export type WhisperJoinRow = {
   modality: "text" | "voice" | "image" | "video";
   content_text: string | null;
   content_transcript: string | null;
+  content_media_url: string | null;
   content_duration_sec: number | null;
   scope: "private" | "circle" | "network" | "public";
   kind: "fact" | "opinion";
@@ -89,6 +91,7 @@ export function joinRowToWhisperRow(row: WhisperJoinRow): WhisperRow {
     modality: row.modality,
     content_text: row.content_text,
     content_transcript: row.content_transcript,
+    content_media_url: row.content_media_url ?? null,
     content_duration_sec: row.content_duration_sec,
     scope: row.scope,
     kind: row.kind,
