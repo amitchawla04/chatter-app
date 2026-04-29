@@ -13,3 +13,7 @@ playwright-report/
 test-results/
 /blob-report/
 /playwright/.cache/
+
+# Playwright cert output (regenerated locally)
+e2e/cert-output/
+!e2e/cert-output/.gitkeep
