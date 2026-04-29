@@ -16,7 +16,7 @@ import { useState, useTransition, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useTransform, type PanInfo } from "framer-motion";
-import { MoreHorizontal, Ban, Flag } from "lucide-react";
+import { MoreHorizontal, Ban, Flag, VolumeX } from "lucide-react";
 import { EchoGlyph, PassGlyph, SaveGlyph } from "./icons/ChatterIcons";
 import {
   bestInsiderCredential,
@@ -24,7 +24,7 @@ import {
   type WhisperRow,
 } from "@/lib/whisper";
 import { toggleEcho, toggleSave } from "@/lib/engagement-actions";
-import { blockUser } from "@/lib/trust-actions";
+import { blockUser, muteUser } from "@/lib/trust-actions";
 import { PassSheet } from "./PassSheet";
 import { CharterBadge } from "./CharterBadge";
 
@@ -430,6 +430,22 @@ export function WhisperCard({
                     <span className="w-3.5">→</span>
                     <span>Hide this whisper</span>
                   </button>
+                  {isAuthed && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        startTransition(async () => {
+                          await muteUser(whisper.author_id);
+                          setMenuOpen(false);
+                          setHidden(true);
+                        });
+                      }}
+                      className="w-full text-left px-3 py-2 hover:bg-paper text-ink flex items-center gap-2"
+                    >
+                      <VolumeX size={12} strokeWidth={1.5} />
+                      <span>Mute @{whisper.author.handle}</span>
+                    </button>
+                  )}
                   {isAuthed && (
                     <button
                       type="button"

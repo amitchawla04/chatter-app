@@ -25,6 +25,7 @@ export async function fetchTrustFilters(): Promise<{ blockedIds: Set<string>; hi
 
   const admin = createAdminClient();
   const [{ data: blocks }, { data: hidden }] = await Promise.all([
+    // both 'block' and 'mute' hide whispers from feeds; only 'block' hides profile (handled at profile-page level)
     admin.from("blocks").select("blocked_id").eq("blocker_id", user.id),
     admin.from("hidden_words").select("word").eq("user_id", user.id),
   ]);

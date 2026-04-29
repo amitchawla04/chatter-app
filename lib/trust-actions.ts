@@ -20,7 +20,22 @@ export async function blockUser(targetUserId: string): Promise<{ ok: true } | { 
   const admin = createAdminClient();
   const { error } = await admin
     .from("blocks")
-    .upsert({ blocker_id: me.id, blocked_id: targetUserId }, { onConflict: "blocker_id,blocked_id" });
+    .upsert({ blocker_id: me.id, blocked_id: targetUserId, mode: "block" }, { onConflict: "blocker_id,blocked_id" });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/home");
+  revalidatePath("/settings/privacy");
+  return { ok: true };
+}
+
+export async function muteUser(targetUserId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const me = await getMe();
+  if (!me) return { ok: false, error: "sign-in required" };
+  if (me.id === targetUserId) return { ok: false, error: "can't mute yourself" };
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("blocks")
+    .upsert({ blocker_id: me.id, blocked_id: targetUserId, mode: "mute" }, { onConflict: "blocker_id,blocked_id" });
   if (error) return { ok: false, error: error.message };
   revalidatePath("/home");
   revalidatePath("/settings/privacy");
@@ -67,5 +82,124 @@ export async function removeHiddenWord(word: string): Promise<{ ok: true } | { o
     .eq("word", word);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/settings/privacy");
+  return { ok: true };
+}
+
+export async function submitInsiderClaim(input: {
+  tag: string;
+  evidenceUrl?: string;
+  evidenceNote?: string;
+}): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
+  const me = await getMe();
+  if (!me) return { ok: false, error: "sign-in required" };
+
+  const tag = input.tag.trim();
+  if (!tag || tag.length < 2 || tag.length > 60) return { ok: false, error: "Tag must be 2–60 chars" };
+
+  const admin = createAdminClient();
+  const { data: dup } = await admin
+    .from("insider_claims")
+    .select("id")
+    .eq("user_id", me.id)
+    .eq("tag", tag)
+    .in("status", ["pending", "approved"])
+    .maybeSingle();
+  if (dup) return { ok: false, error: "You already have a claim for this credential" };
+
+  const { data, error } = await admin
+    .from("insider_claims")
+    .insert({
+      user_id: me.id,
+      tag,
+      evidence_url: input.evidenceUrl?.trim() || null,
+      evidence_note: input.evidenceNote?.trim() || null,
+    })
+    .select("id")
+    .single();
+  if (error || !data) return { ok: false, error: error?.message ?? "insert failed" };
+  revalidatePath("/you/credentials");
+  revalidatePath("/founder/insider-claims");
+  return { ok: true, id: (data as { id: string }).id };
+}
+
+async function getModerator() {
+  const me = await getMe();
+  if (!me) return null;
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("users")
+    .select("id, is_moderator")
+    .eq("id", me.id)
+    .maybeSingle();
+  return data && (data as { is_moderator: boolean }).is_moderator ? me : null;
+}
+
+export async function reviewInsiderClaim(input: {
+  claimId: string;
+  decision: "approved" | "rejected";
+  note?: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const mod = await getModerator();
+  if (!mod) return { ok: false, error: "moderator-only" };
+
+  const admin = createAdminClient();
+  const { data: claim } = await admin
+    .from("insider_claims")
+    .select("id, user_id, tag, status")
+    .eq("id", input.claimId)
+    .maybeSingle();
+  if (!claim) return { ok: false, error: "claim not found" };
+  const c = claim as { id: string; user_id: string; tag: string; status: string };
+  if (c.status !== "pending") return { ok: false, error: "already reviewed" };
+
+  await admin
+    .from("insider_claims")
+    .update({
+      status: input.decision,
+      reviewed_by: mod.id,
+      reviewed_at: new Date().toISOString(),
+      reviewer_note: input.note?.trim() || null,
+    })
+    .eq("id", c.id);
+
+  if (input.decision === "approved") {
+    const { data: userRow } = await admin
+      .from("users")
+      .select("insider_tags")
+      .eq("id", c.user_id)
+      .maybeSingle();
+    const existing = ((userRow as { insider_tags: string[] | null } | null)?.insider_tags ?? []);
+    if (!existing.includes(c.tag)) {
+      await admin
+        .from("users")
+        .update({ insider_tags: [...existing, c.tag] })
+        .eq("id", c.user_id);
+    }
+  }
+
+  revalidatePath("/founder/insider-claims");
+  revalidatePath("/you/credentials");
+  return { ok: true };
+}
+
+export async function vouchFor(input: {
+  topicId: string;
+  targetUserId?: string | null;
+  text: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const me = await getMe();
+  if (!me) return { ok: false, error: "sign-in required" };
+
+  const text = input.text.trim();
+  if (!text || text.length > 280) return { ok: false, error: "Vouch text must be 1–280 chars" };
+
+  const admin = createAdminClient();
+  const { error } = await admin.from("vouches").insert({
+    topic_id: input.topicId,
+    author_id: me.id,
+    content_text: text,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/t/${input.topicId}`);
   return { ok: true };
 }

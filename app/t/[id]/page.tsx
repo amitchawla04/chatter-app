@@ -10,6 +10,7 @@ import { ChatterMark } from "@/components/ChatterMark";
 import { TabBar } from "@/components/TabBar";
 import { WhisperCard } from "@/components/WhisperCard";
 import { TuneInButton } from "@/components/TuneInButton";
+import { VouchesPanel } from "@/components/VouchesPanel";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { fetchTopicWhispers, fetchEchoedIds, fetchSavedIds } from "@/lib/queries";
@@ -124,6 +125,9 @@ export default async function TopicPage({
         )}
         {user && <TuneInButton topicId={id} initiallyTuned={tunedIn} />}
       </section>
+
+      {/* Vouches strip — credentialed expertise statements per topic */}
+      <VouchesPanel topicId={id} topicName={topic.name} isAuthed={isAuthed} />
 
       <section className="pb-8">
         {whispers.length === 0 ? (
