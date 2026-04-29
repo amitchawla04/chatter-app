@@ -7,7 +7,8 @@ test.describe("Chatter — public surfaces", () => {
   test("landing renders proof-whisper, wordmark, 4 Pact pills, CTA", async ({ page }) => {
     await page.goto(BASE);
     await expect(page.getByText("scale follows craft")).toBeVisible();
-    await expect(page.getByText(/whispers from people who actually know/i)).toBeVisible();
+    // Hero copy appears in both visible body text and the sr-only h1; first() avoids strict-mode dup match
+    await expect(page.getByText(/whispers from people who actually know/i).first()).toBeVisible();
     await expect(page.getByText("no ads ever")).toBeVisible();
     await expect(page.getByText("no public counts")).toBeVisible();
     await expect(page.getByText("your data stays yours")).toBeVisible();
@@ -67,7 +68,8 @@ test.describe("Chatter — public surfaces", () => {
     const manifest = await request.get(`${BASE}/manifest.json`);
     expect(manifest.status()).toBe(200);
     const json = await manifest.json();
-    expect(json.name).toBe("Chatter");
+    expect(json.short_name).toBe("Chatter");
+    expect(json.name).toMatch(/^Chatter/);
     expect(json.theme_color).toBe("#FAF9F6");
 
     const icon = await request.get(`${BASE}/icon`);
