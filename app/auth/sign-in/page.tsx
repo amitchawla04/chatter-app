@@ -18,31 +18,44 @@ import { ChatterMark } from "@/components/ChatterMark";
 import { createClient } from "@/lib/supabase/client";
 import { useT } from "@/components/I18nProvider";
 
-type Step = "email" | "code";
+type Step = "input" | "code";
+type Channel = "email" | "phone";
 
 export default function SignInPage() {
   const router = useRouter();
   const t = useT();
-  const [step, setStep] = useState<Step>("email");
+  const [channel, setChannel] = useState<Channel>("email");
+  const [step, setStep] = useState<Step>("input");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [status, setStatus] = useState<"idle" | "pending" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
 
+  const normalizedPhone = () => {
+    const digits = phone.replace(/[^\d+]/g, "");
+    return digits.startsWith("+") ? digits : `+${digits}`;
+  };
+
   const sendCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || status === "pending") return;
+    const ready =
+      channel === "email" ? email.trim() : normalizedPhone().length >= 9;
+    if (!ready || status === "pending") return;
     setStatus("pending");
     setMessage(null);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim().toLowerCase(),
-      options: {
-        shouldCreateUser: true,
-        // No emailRedirectTo — user enters code in-app instead of clicking a link
-      },
-    });
+    const { error } =
+      channel === "email"
+        ? await supabase.auth.signInWithOtp({
+            email: email.trim().toLowerCase(),
+            options: { shouldCreateUser: true },
+          })
+        : await supabase.auth.signInWithOtp({
+            phone: normalizedPhone(),
+            options: { shouldCreateUser: true },
+          });
 
     if (error) {
       setStatus("error");
@@ -61,15 +74,26 @@ export default function SignInPage() {
     setMessage(null);
 
     const supabase = createClient();
-    const { data, error } = await supabase.auth.verifyOtp({
-      email: email.trim().toLowerCase(),
-      token: code,
-      type: "email",
-    });
+    const { data, error } =
+      channel === "email"
+        ? await supabase.auth.verifyOtp({
+            email: email.trim().toLowerCase(),
+            token: code,
+            type: "email",
+          })
+        : await supabase.auth.verifyOtp({
+            phone: normalizedPhone(),
+            token: code,
+            type: "sms",
+          });
 
     if (error) {
       setStatus("error");
-      setMessage(error.message.includes("expired") ? "code expired · request a new one." : "code didn't match. try again.");
+      setMessage(
+        error.message.includes("expired")
+          ? "code expired · request a new one."
+          : "code didn't match. try again.",
+      );
       return;
     }
 
@@ -97,11 +121,19 @@ export default function SignInPage() {
 
       <section className="flex-1 flex items-center px-6 sm:px-10 py-16">
         <div className="max-w-md mx-auto w-full">
-          {step === "email" ? (
-            <EmailStep
+          {step === "input" ? (
+            <InputStep
               t={t}
+              channel={channel}
+              setChannel={(c) => {
+                setChannel(c);
+                setMessage(null);
+                setStatus("idle");
+              }}
               email={email}
               setEmail={setEmail}
+              phone={phone}
+              setPhone={setPhone}
               onSubmit={sendCode}
               status={status}
               message={message}
@@ -109,12 +141,13 @@ export default function SignInPage() {
           ) : (
             <CodeStep
               t={t}
-              email={email}
+              channel={channel}
+              contact={channel === "email" ? email : normalizedPhone()}
               code={code}
               setCode={setCode}
               onSubmit={verifyCode}
               onBack={() => {
-                setStep("email");
+                setStep("input");
                 setCode("");
                 setMessage(null);
                 setStatus("idle");
@@ -143,21 +176,32 @@ export default function SignInPage() {
   );
 }
 
-function EmailStep({
+function InputStep({
   t,
+  channel,
+  setChannel,
   email,
   setEmail,
+  phone,
+  setPhone,
   onSubmit,
   status,
   message,
 }: {
   t: (k: string) => string;
+  channel: "email" | "phone";
+  setChannel: (c: "email" | "phone") => void;
   email: string;
   setEmail: (s: string) => void;
+  phone: string;
+  setPhone: (s: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   status: "idle" | "pending" | "error";
   message: string | null;
 }) {
+  const isReady =
+    channel === "email" ? email.trim().length > 0 : phone.replace(/[^\d]/g, "").length >= 9;
+
   return (
     <>
       <motion.h1
@@ -172,10 +216,43 @@ function EmailStep({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="body-text text-muted mb-10"
+        className="body-text text-muted mb-8"
       >
         {t("signin.sub_email")}
       </motion.p>
+
+      {/* Channel toggle */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.15 }}
+        role="tablist"
+        aria-label="Sign-in method"
+        className="grid grid-cols-2 mb-6 border border-line"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={channel === "email"}
+          onClick={() => setChannel("email")}
+          className={`px-4 py-2.5 mono-text text-xs uppercase tracking-wider transition-colors ${
+            channel === "email" ? "bg-red text-paper" : "text-muted hover:text-ink"
+          }`}
+        >
+          email
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={channel === "phone"}
+          onClick={() => setChannel("phone")}
+          className={`px-4 py-2.5 mono-text text-xs uppercase tracking-wider transition-colors border-l border-line ${
+            channel === "phone" ? "bg-red text-paper" : "text-muted hover:text-ink"
+          }`}
+        >
+          phone
+        </button>
+      </motion.div>
 
       <motion.form
         initial={{ opacity: 0, y: 8 }}
@@ -184,26 +261,48 @@ function EmailStep({
         onSubmit={onSubmit}
         className="space-y-5"
       >
-        <div>
-          <label htmlFor="email" className="label-text text-muted block mb-2">
-            {t("signin.email_label")}
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            required
-            autoFocus
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={t("signin.email_placeholder")}
-            className="w-full bg-transparent border border-line focus:border-gold text-ink placeholder-muted-soft px-4 py-3 outline-none transition-colors"
-          />
-        </div>
+        {channel === "email" ? (
+          <div>
+            <label htmlFor="email" className="label-text text-muted block mb-2">
+              {t("signin.email_label")}
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              required
+              autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={t("signin.email_placeholder")}
+              className="w-full bg-transparent border border-line focus:border-gold text-ink placeholder-muted-soft px-4 py-3 outline-none transition-colors"
+            />
+          </div>
+        ) : (
+          <div>
+            <label htmlFor="phone" className="label-text text-muted block mb-2">
+              phone
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              autoComplete="tel"
+              required
+              autoFocus
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+1 555 555 5555"
+              className="w-full bg-transparent border border-line focus:border-gold text-ink placeholder-muted-soft px-4 py-3 outline-none transition-colors"
+            />
+            <p className="mono-text text-[10px] text-muted mt-1.5">
+              include country code (+1 for US, +44 UK, +91 IN)
+            </p>
+          </div>
+        )}
 
         <button
           type="submit"
-          disabled={status === "pending" || !email.trim()}
+          disabled={status === "pending" || !isReady}
           className="btn-primary w-full justify-center"
         >
           {status === "pending" ? t("signin.sending") : t("signin.send_code")}
@@ -220,7 +319,8 @@ function EmailStep({
 
 function CodeStep({
   t,
-  email,
+  channel,
+  contact,
   code,
   setCode,
   onSubmit,
@@ -230,7 +330,8 @@ function CodeStep({
   message,
 }: {
   t: (k: string) => string;
-  email: string;
+  channel: "email" | "phone";
+  contact: string;
   code: string;
   setCode: (s: string) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -247,7 +348,7 @@ function CodeStep({
         transition={{ duration: 0.6 }}
         className="display-text text-3xl sm:text-4xl text-ink mb-3"
       >
-        {t("signin.heading_code")}
+        {channel === "phone" ? "check your messages." : t("signin.heading_code")}
       </motion.h1>
       <motion.p
         initial={{ opacity: 0 }}
@@ -255,7 +356,10 @@ function CodeStep({
         transition={{ duration: 0.6, delay: 0.1 }}
         className="body-text text-muted mb-10"
       >
-        {t("signin.sub_code")} <span className="text-ink">{email}</span>.
+        {channel === "phone"
+          ? `we sent a 6-digit code to`
+          : t("signin.sub_code")}{" "}
+        <span className="text-ink">{contact}</span>.
       </motion.p>
 
       <motion.form
