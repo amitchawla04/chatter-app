@@ -6,6 +6,8 @@
  *  - Recent searches persisted in localStorage (last 6, swipe-clear)
  *  - Keyboard nav: ↓/↑ through suggestions, Enter to commit
  *  - Closes on outside click or Escape
+ *
+ * A11y: combobox + listbox per WAI-ARIA 1.2 authoring practices.
  */
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
@@ -58,7 +60,6 @@ export function SearchBar({ initial = "" }: { initial?: string }) {
     setRecents(readRecents());
   }, []);
 
-  // Debounced fetch
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     const term = q.trim();
@@ -71,11 +72,7 @@ export function SearchBar({ initial = "" }: { initial?: string }) {
       const supabase = createClient();
       const safe = term.replace(/[,()'"]/g, "").slice(0, 50);
       const [topicRes, userRes] = await Promise.all([
-        supabase
-          .from("topics")
-          .select("id, name, emoji")
-          .ilike("name", `%${safe}%`)
-          .limit(5),
+        supabase.from("topics").select("id, name, emoji").ilike("name", `%${safe}%`).limit(5),
         supabase
           .from("users")
           .select("handle, display_name")
@@ -90,7 +87,6 @@ export function SearchBar({ initial = "" }: { initial?: string }) {
     };
   }, [q]);
 
-  // Outside click closes
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
@@ -165,26 +161,28 @@ export function SearchBar({ initial = "" }: { initial?: string }) {
     <div ref={containerRef} className="relative">
       <form
         onSubmit={submit}
+        role="search"
         className="flex items-center gap-2 border border-line focus-within:border-red bg-paper transition-colors"
       >
-        <Search size={16} strokeWidth={1.5} className="text-muted ml-3" />
-        <input
-          type="search"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setOpen(true);
-            setActiveIdx(-1);
-          }}
-          onFocus={() => setOpen(true)}
-          onKeyDown={onKey}
-          placeholder="topic · person · whisper"
-          autoFocus
-          aria-autocomplete="list"
-          aria-expanded={open}
-          aria-controls="search-suggestions"
-          className="flex-1 bg-transparent text-ink placeholder-muted-soft py-2.5 outline-none text-sm"
-        />
+        <Search size={16} strokeWidth={1.5} className="text-muted ml-3" aria-hidden="true" />
+        <div role="combobox" aria-expanded={open} aria-haspopup="listbox" aria-controls="search-suggestions" aria-owns="search-suggestions" className="flex-1">
+          <input
+            type="search"
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setOpen(true);
+              setActiveIdx(-1);
+            }}
+            onFocus={() => setOpen(true)}
+            onKeyDown={onKey}
+            placeholder="topic · person · whisper"
+            aria-label="Search topics, people, or whispers"
+            aria-autocomplete="list"
+            autoFocus
+            className="w-full bg-transparent text-ink placeholder-muted-soft py-2.5 outline-none text-sm"
+          />
+        </div>
         <button
           type="submit"
           disabled={!q.trim()}
@@ -198,76 +196,90 @@ export function SearchBar({ initial = "" }: { initial?: string }) {
         <ul
           id="search-suggestions"
           role="listbox"
+          aria-label="Search suggestions"
           className="absolute left-0 right-0 mt-1 z-40 bg-paper border border-line shadow-sm max-h-72 overflow-y-auto"
         >
           {q.trim().length < 2 && recents.length > 0 && (
-            <li className="px-3 py-2 mono-text text-[10px] uppercase tracking-wider text-muted border-b border-line/60">
+            <li className="px-3 py-2 mono-text text-[10px] uppercase tracking-wider text-muted border-b border-line/60" aria-hidden="true">
               recent
             </li>
           )}
           {suggestions.map((s, i) => {
             const isActive = i === activeIdx;
-            const baseCls = `flex items-center gap-2.5 px-3 py-2.5 transition-colors text-sm cursor-pointer ${
+            const baseCls = `flex items-center gap-2.5 px-3 py-2.5 transition-colors text-sm w-full text-left ${
               isActive ? "bg-red/10 text-red" : "text-ink hover:bg-canvas"
             }`;
             if (s.kind === "recent") {
+              const id = `sugg-recent-${i}`;
               return (
-                <li key={`r-${s.label}`} role="option" aria-selected={isActive}>
-                  <div className="flex items-center">
-                    <button
-                      type="button"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        commit(s.label);
-                      }}
-                      className={`flex-1 text-left ${baseCls}`}
-                    >
-                      <Clock size={14} strokeWidth={1.5} className="text-muted shrink-0" />
-                      <span className="truncate">{s.label}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => removeRecent(s.label)}
-                      className="px-3 py-2.5 text-muted hover:text-warn"
-                      aria-label={`Forget search "${s.label}"`}
-                    >
-                      <X size={12} strokeWidth={1.5} />
-                    </button>
-                  </div>
+                <li key={id} className="flex items-stretch border-b border-line/40 last:border-b-0">
+                  <button
+                    id={id}
+                    type="button"
+                    role="option"
+                    aria-selected={isActive}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      commit(s.label);
+                    }}
+                    className={`flex-1 ${baseCls}`}
+                  >
+                    <Clock size={14} strokeWidth={1.5} className="text-muted shrink-0" aria-hidden="true" />
+                    <span className="truncate">{s.label}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      removeRecent(s.label);
+                    }}
+                    className="px-3 py-2.5 text-muted hover:text-warn shrink-0"
+                    aria-label={`Forget search "${s.label}"`}
+                  >
+                    <X size={12} strokeWidth={1.5} aria-hidden="true" />
+                  </button>
                 </li>
               );
             }
             if (s.kind === "topic") {
+              const id = `sugg-t-${s.id}`;
               return (
-                <li key={`t-${s.id}`} role="option" aria-selected={isActive}>
+                <li key={id}>
                   <button
+                    id={id}
                     type="button"
+                    role="option"
+                    aria-selected={isActive}
                     onMouseDown={(e) => {
                       e.preventDefault();
                       setOpen(false);
                       router.push(`/t/${s.id}`);
                     }}
-                    className={`w-full text-left ${baseCls}`}
+                    className={baseCls}
                   >
-                    <span className="text-base shrink-0">{s.emoji ?? "·"}</span>
+                    <span className="text-base shrink-0" aria-hidden="true">{s.emoji ?? "·"}</span>
                     <span className="truncate">{s.label}</span>
                     <span className="ml-auto mono-text text-[10px] text-muted shrink-0">topic</span>
                   </button>
                 </li>
               );
             }
+            const id = `sugg-u-${s.handle}`;
             return (
-              <li key={`u-${s.handle}`} role="option" aria-selected={isActive}>
+              <li key={id}>
                 <button
+                  id={id}
                   type="button"
+                  role="option"
+                  aria-selected={isActive}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     setOpen(false);
                     router.push(`/u/${s.handle}`);
                   }}
-                  className={`w-full text-left ${baseCls}`}
+                  className={baseCls}
                 >
-                  <div className="w-5 h-5 rounded-full bg-line flex items-center justify-center text-[10px] shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-line flex items-center justify-center text-[10px] shrink-0" aria-hidden="true">
                     {s.label[0]?.toUpperCase() ?? "·"}
                   </div>
                   <span className="truncate">@{s.handle}</span>
