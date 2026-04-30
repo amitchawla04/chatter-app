@@ -1,12 +1,15 @@
 "use client";
 
 /**
- * Meta row on the whisper-detail surface (Surface 7.2-7.4).
+ * Meta row on the whisper-detail surface (Surface 7.2-7.4 + CN24 chain link).
  * Shows "N echoes from insiders · N passes · N saves" + opens the
- * EngagementListSheet for either echoes or passes.
+ * EngagementListSheet for either echoes or passes. If the whisper has been
+ * passed, also offers a tertiary link to the full pass-chain visualization.
  */
 
 import { useState } from "react";
+import Link from "next/link";
+import { GitBranch } from "lucide-react";
 import { EngagementListSheet } from "./EngagementListSheet";
 
 interface Props {
@@ -52,6 +55,16 @@ export function WhisperEngagementMeta({
             <span>{passCount === 1 ? "pass" : "passes"}</span>
             <span className="text-red ml-1">show →</span>
           </button>
+        )}
+        {passCount > 0 && (
+          <Link
+            href={`/w/${whisperId}/chain`}
+            className="hover:text-red transition-colors flex items-center gap-1.5 ml-auto no-underline-link"
+            aria-label="Open the pass-chain visualization for this whisper"
+          >
+            <GitBranch size={11} strokeWidth={1.6} />
+            <span>see chain →</span>
+          </Link>
         )}
       </div>
       {open && (

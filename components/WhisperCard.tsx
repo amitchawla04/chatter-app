@@ -297,6 +297,19 @@ export function WhisperCard({
           )}
         </div>
 
+        {/* TM2: review-status label visible to all readers when a moderator
+            has flagged this whisper. Pact 11: investigations are public. */}
+        {whisper.review_status && (
+          <div className="mb-3 -mx-5 px-5 py-2 border-l-2 border-warn bg-warn/5 mono-text text-[10px] uppercase tracking-wider text-warn">
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden="true" className="block w-1.5 h-1.5 rounded-full bg-warn" />
+              {whisper.review_status === "claim_under_review"
+                ? "[claim under review] · a specific factual claim is being verified"
+                : "[under review] · this whisper is being investigated"}
+            </span>
+          </div>
+        )}
+
         {/* Open Graph preview for first URL in body (IP2) */}
         {detectedUrl && !obscured && whisper.modality === "text" && (
           <LinkPreview url={detectedUrl} />

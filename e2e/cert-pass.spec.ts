@@ -17,6 +17,9 @@ import AxeBuilder from "@axe-core/playwright";
 const BASE = "https://chatter.today";
 const BYPASS = `${BASE}/auth/bypass?email=amit.chawla@reward360.co&s=dbeb3e4645f58dc80e7cb0dc6b562a7b`;
 const SAMPLE_TICKETED_EVENT = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeee10";
+const AWARDS_EVENT = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeee20";
+const NEWS_EVENT = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeee21";
+const PREMIERE_EVENT = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeee22";
 const STORAGE = path.join(__dirname, "cert-output", ".storage.json");
 const OUT_DIR = path.join(__dirname, "cert-output");
 
@@ -69,6 +72,10 @@ const ROUTES: CertRoute[] = [
   { path: "/moderation", label: "41-moderation" },
   { path: "/brand/logos", label: "42-brand-logos-v1" },
   { path: "/brand/logos-v2", label: "43-brand-logos-v2" },
+  { path: "/moderation/log", label: "44-moderation-log" },
+  { path: `/live/${AWARDS_EVENT}`, label: "45-live-awards" },
+  { path: `/live/${NEWS_EVENT}`, label: "46-live-news" },
+  { path: `/live/${PREMIERE_EVENT}`, label: "47-live-premiere" },
 ];
 
 interface RouteReport {

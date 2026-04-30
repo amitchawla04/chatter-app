@@ -12,6 +12,7 @@ import { TabBar } from "@/components/TabBar";
 import { WhisperCard } from "@/components/WhisperCard";
 import { WatchTogether } from "@/components/WatchTogether";
 import { MomentWhisper } from "@/components/MomentWhisper";
+import { LiveEventHero } from "@/components/LiveEventHero";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { fetchTopicWhispers, fetchEchoedIds, fetchSavedIds, userHasTicket } from "@/lib/queries";
@@ -81,6 +82,13 @@ interface LiveEvent {
   starts_at: string;
   is_ticketed: boolean | null;
   ticket_price_cents: number | null;
+  current_segment_label: string | null;
+  segments_total: number | null;
+  segments_revealed: number | null;
+  urgency_level: number | null;
+  sources_cited: number | null;
+  episode_label: string | null;
+  spoiler_shield_default: boolean | null;
 }
 
 interface Moment {
@@ -194,7 +202,40 @@ export default async function LiveEventPage({
             <p className="mono-text text-sm text-red font-medium">{e.minute_label}</p>
           )}
         </section>
+      ) : e.kind === "awards" ? (
+        <LiveEventHero
+          kind="awards"
+          title={e.title}
+          subtitle={e.subtitle}
+          status={e.status}
+          startsAt={e.starts_at}
+          currentSegmentLabel={e.current_segment_label}
+          segmentsTotal={e.segments_total}
+          segmentsRevealed={e.segments_revealed}
+        />
+      ) : e.kind === "news" ? (
+        <LiveEventHero
+          kind="news"
+          title={e.title}
+          subtitle={e.subtitle}
+          status={e.status}
+          startsAt={e.starts_at}
+          urgencyLevel={e.urgency_level}
+          sourcesCited={e.sources_cited ?? 0}
+          minuteLabel={e.minute_label}
+        />
+      ) : e.kind === "premiere" ? (
+        <LiveEventHero
+          kind="premiere"
+          title={e.title}
+          subtitle={e.subtitle}
+          status={e.status}
+          startsAt={e.starts_at}
+          episodeLabel={e.episode_label}
+          spoilerShieldDefault={Boolean(e.spoiler_shield_default)}
+        />
       ) : (
+        // Fallback for `space` and any future kind — generic clean header
         <section className="px-5 py-8 border-b border-line text-center">
           <div className="flex items-center justify-center gap-2 mb-3 text-xs mono-text text-muted">
             <Icon size={14} strokeWidth={1.5} />

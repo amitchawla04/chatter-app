@@ -93,7 +93,7 @@ export default async function WhisperDetailPage({
       id, author_id, topic_id, modality, content_text, content_transcript, content_media_url,
       content_duration_sec, scope, kind, is_whisper_tier, is_spoiler, is_breath,
       require_reply_approval, ttl, expires_at, deleted_at,
-      echo_count, pass_count, corroboration_count, created_at,
+      echo_count, pass_count, corroboration_count, review_status, created_at,
       users:author_id ( handle, display_name, insider_tags, trust_score, is_charter ),
       topics:topic_id ( id, name, emoji, type )
     `)
@@ -113,7 +113,7 @@ export default async function WhisperDetailPage({
     .select(`
       id, author_id, topic_id, modality, content_text, content_transcript, content_media_url,
       content_duration_sec, scope, kind, is_whisper_tier, hidden_by_author_at,
-      echo_count, pass_count, corroboration_count, created_at,
+      echo_count, pass_count, corroboration_count, review_status, created_at,
       users:author_id ( handle, display_name, insider_tags, trust_score, is_charter ),
       topics:topic_id ( id, name, emoji, type )
     `)

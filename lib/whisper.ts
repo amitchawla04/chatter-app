@@ -25,6 +25,7 @@ export type WhisperRow = {
   deleted_at?: string | null;
   parent_id?: string | null;
   hidden_by_author_at?: string | null;
+  review_status?: "claim_under_review" | "under_review" | null;
   echo_count: number;
   pass_count: number;
   corroboration_count: number;
@@ -66,6 +67,7 @@ export type WhisperJoinRow = {
   deleted_at?: string | null;
   parent_id?: string | null;
   hidden_by_author_at?: string | null;
+  review_status?: "claim_under_review" | "under_review" | null;
   echo_count: number;
   pass_count: number;
   corroboration_count: number;
@@ -108,6 +110,7 @@ export function joinRowToWhisperRow(row: WhisperJoinRow): WhisperRow {
     deleted_at: row.deleted_at ?? null,
     parent_id: row.parent_id ?? null,
     hidden_by_author_at: row.hidden_by_author_at ?? null,
+    review_status: row.review_status ?? null,
     echo_count: row.echo_count,
     pass_count: row.pass_count,
     corroboration_count: row.corroboration_count,
