@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Sparkles, Award, Coins, MessageSquareQuote, ShieldCheck, Users } from "lucide-react";
 import { ChatterMark } from "@/components/ChatterMark";
 import { TabBar } from "@/components/TabBar";
+import { MascotIcon } from "@/components/MascotIcon";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const revalidate = 300;
@@ -65,7 +66,7 @@ export default async function CharterPage() {
       </header>
 
       <section className="px-5 pt-12 pb-8 max-w-2xl mx-auto text-center">
-        <Sparkles className="text-gold mx-auto mb-4" size={36} strokeWidth={1.25} />
+        <MascotIcon name="brand-charter-cohort" size={120} className="mx-auto mb-4" alt="The Charter cohort" />
         <h1 className="display-italic text-4xl sm:text-5xl text-ink leading-tight mb-3">
           The Charter.
         </h1>

@@ -14,6 +14,7 @@ import { notFound } from "next/navigation";
 import { ChatterMark } from "@/components/ChatterMark";
 import { TabBar } from "@/components/TabBar";
 import { PassChainTree } from "@/components/PassChainTree";
+import { MascotIcon } from "@/components/MascotIcon";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const revalidate = 30;
@@ -122,7 +123,10 @@ export default async function PassChainPage({
 
       {/* Whisper context */}
       <section className="px-5 py-5 border-b border-line">
-        <p className="label-text text-red mb-2">pass chain</p>
+        <div className="flex items-center gap-3 mb-2">
+          <MascotIcon name="brand-pass-chain" size={56} alt="pass chain" />
+          <p className="label-text text-red">pass chain</p>
+        </div>
         <p className="display-italic text-lg text-ink leading-snug line-clamp-3 mb-3">
           &ldquo;{excerpt}&rdquo;
         </p>

@@ -8,6 +8,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { MascotIcon, type MascotName } from "./MascotIcon";
 
 interface EmptyStateProps {
   /** Single short headline — usually a question or invitation. */
@@ -18,14 +19,18 @@ interface EmptyStateProps {
   cta?: { label: string; href: string } | { label: string; onClick: () => void };
   /** Optional override for the breathing glyph. Default = the brand's red period. */
   glyph?: ReactNode;
+  /** Or pass a Cycle 2 mascot name and EmptyState renders the icon for you. */
+  mascot?: MascotName;
 }
 
-export function EmptyState({ heading, body, cta, glyph }: EmptyStateProps) {
+export function EmptyState({ heading, body, cta, glyph, mascot }: EmptyStateProps) {
   return (
     <section className="flex-1 px-6 py-20 flex flex-col items-center justify-center text-center">
       <div className="mb-6 flex items-center justify-center">
-        {glyph ?? (
-          <span className="block w-16 h-16 rounded-full bg-red chatter-empty-breath" />
+        {mascot ? (
+          <MascotIcon name={mascot} size={88} className="rounded-2xl" />
+        ) : (
+          glyph ?? <span className="block w-16 h-16 rounded-full bg-red chatter-empty-breath" />
         )}
       </div>
       <h2 className="display-italic text-2xl text-ink mb-3 max-w-md leading-tight">

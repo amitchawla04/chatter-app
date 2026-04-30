@@ -3,9 +3,9 @@
  * (or all events for anon users). Retention Loop 1 surface.
  */
 import Link from "next/link";
-import { Trophy, Tv, Newspaper, Mic2 } from "lucide-react";
 import { ChatterMark } from "@/components/ChatterMark";
 import { TabBar } from "@/components/TabBar";
+import { MascotIcon, type MascotName } from "@/components/MascotIcon";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { relativeTime } from "@/lib/whisper";
 
@@ -22,13 +22,13 @@ interface LiveEvent {
   topics?: { name: string; emoji: string | null } | null;
 }
 
-const kindIcon = {
-  match: Trophy,
-  awards: Trophy,
-  premiere: Tv,
-  news: Newspaper,
-  space: Mic2,
-} as const;
+const kindMascot: Record<LiveEvent["kind"], MascotName> = {
+  match: "moment-match",
+  awards: "moment-awards",
+  news: "moment-news",
+  premiere: "moment-premiere",
+  space: "moment-space",
+};
 
 export default async function WhatsLivePage() {
   const admin = createAdminClient();
@@ -64,33 +64,28 @@ export default async function WhatsLivePage() {
           <p className="text-muted text-sm py-6">nothing live right now.</p>
         ) : (
           <div className="space-y-3">
-            {live.map((e) => {
-              const Icon = kindIcon[e.kind] ?? Trophy;
-              return (
-                <Link
-                  key={e.id}
-                  href={`/live/${e.id}`}
-                  className="block border border-line p-4 hover:border-red bg-paper transition-colors"
-                >
-                  <div className="flex items-start gap-3">
-                    {e.topics?.emoji && <span className="text-2xl">{e.topics.emoji}</span>}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 mono-text text-[10px] uppercase tracking-wider text-muted">
-                        <Icon size={12} strokeWidth={1.5} />
-                        <span>{e.kind}</span>
-                        <span className="text-red">· LIVE</span>
-                      </div>
-                      <div className="display-italic text-lg text-ink">{e.title}</div>
-                      {e.subtitle && (
-                        <div className="mono-text text-[11px] text-muted mt-1">
-                          {e.subtitle}
-                        </div>
-                      )}
+            {live.map((e) => (
+              <Link
+                key={e.id}
+                href={`/live/${e.id}`}
+                className="block border border-line p-4 hover:border-red bg-paper transition-colors"
+              >
+                <div className="flex items-start gap-3">
+                  <MascotIcon name={kindMascot[e.kind] ?? "moment-space"} size={48} alt={e.kind} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 mono-text text-[10px] uppercase tracking-wider text-muted">
+                      <span>{e.kind}</span>
+                      <span className="text-red">· LIVE</span>
+                      {e.topics?.name && <span className="text-gold">· {e.topics.name}</span>}
                     </div>
+                    <div className="display-italic text-lg text-ink">{e.title}</div>
+                    {e.subtitle && (
+                      <div className="mono-text text-[11px] text-muted mt-1">{e.subtitle}</div>
+                    )}
                   </div>
-                </Link>
-              );
-            })}
+                </div>
+              </Link>
+            ))}
           </div>
         )}
       </section>
@@ -102,7 +97,6 @@ export default async function WhatsLivePage() {
         ) : (
           <div className="space-y-3">
             {upcoming.map((e) => {
-              const Icon = kindIcon[e.kind] ?? Trophy;
               return (
                 <Link
                   key={e.id}
@@ -110,12 +104,12 @@ export default async function WhatsLivePage() {
                   className="block border border-line p-4 hover:border-line/60 bg-paper transition-colors"
                 >
                   <div className="flex items-start gap-3">
-                    {e.topics?.emoji && <span className="text-2xl">{e.topics.emoji}</span>}
+                    <MascotIcon name={kindMascot[e.kind] ?? "moment-space"} size={42} alt={e.kind} className="opacity-80" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 mono-text text-[10px] uppercase tracking-wider text-muted">
-                        <Icon size={12} strokeWidth={1.5} />
                         <span>{e.kind}</span>
                         <span>· in {relativeTime(e.starts_at).replace("-", "")}</span>
+                        {e.topics?.name && <span className="text-gold">· {e.topics.name}</span>}
                       </div>
                       <div className="display-italic text-lg text-ink">{e.title}</div>
                       {e.subtitle && (

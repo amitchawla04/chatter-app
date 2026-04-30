@@ -161,6 +161,9 @@ export default function LogosV2Page() {
           <Link href="/brand/logos" className="label-text text-muted hover:text-ink transition no-underline-link">
             ← cycle 1
           </Link>
+          <Link href="/brand/system" className="label-text text-red hover:text-ink transition no-underline-link">
+            system →
+          </Link>
           <Link href="/" className="label-text text-muted hover:text-ink transition no-underline-link">
             home
           </Link>

@@ -13,6 +13,7 @@
 import { useState } from "react";
 import type { GlimpseRow } from "@/lib/queries";
 import { GlimpseLightbox } from "./GlimpseLightbox";
+import { MascotIcon } from "./MascotIcon";
 import { useT } from "./I18nProvider";
 
 interface GlimpseStripProps {
@@ -31,8 +32,11 @@ export function GlimpseStrip({ glimpses }: GlimpseStripProps) {
         aria-label="Glimpse — photos from the last 24 hours"
         className="border-b border-line bg-paper"
       >
-        <div className="px-5 pt-4 pb-1 flex items-baseline justify-between">
-          <h2 className="label-text text-ink">{t("home.glimpse_today")}</h2>
+        <div className="px-5 pt-4 pb-1 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <MascotIcon name="glimpse" size={26} alt="" />
+            <h2 className="label-text text-ink">{t("home.glimpse_today")}</h2>
+          </div>
           <span className="mono-text text-[10px] text-muted uppercase tracking-wider">
             {t("home.glimpse_window")}
           </span>

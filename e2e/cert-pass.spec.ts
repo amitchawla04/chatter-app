@@ -72,6 +72,7 @@ const ROUTES: CertRoute[] = [
   { path: "/moderation", label: "41-moderation" },
   { path: "/brand/logos", label: "42-brand-logos-v1" },
   { path: "/brand/logos-v2", label: "43-brand-logos-v2" },
+  { path: "/brand/system", label: "43b-brand-system" },
   { path: "/moderation/log", label: "44-moderation-log" },
   { path: `/live/${AWARDS_EVENT}`, label: "45-live-awards" },
   { path: `/live/${NEWS_EVENT}`, label: "46-live-news" },

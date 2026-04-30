@@ -26,6 +26,7 @@ import { uploadMedia } from "@/lib/upload-actions";
 import { VoiceRecorder } from "./VoiceRecorder";
 import { ImagePicker } from "./ImagePicker";
 import { useT } from "./I18nProvider";
+import { MascotIcon, type MascotName } from "./MascotIcon";
 
 type Modality = "text" | "voice" | "image" | "video" | "breath";
 type Scope = "public" | "network" | "circle" | "private";
@@ -373,32 +374,44 @@ export function ComposeForm({ topics, initialTopicId, quote }: Props) {
           )}
         </div>
 
-        {/* Scope — who hears this (hidden when breath: auto-circle) */}
+        {/* Scope — who hears this (hidden when breath: auto-circle).
+            Each scope shows its Cycle 2 mascot above the label so the choice
+            is felt, not just legible (Pact 5 — scope is a felt decision). */}
         {!isBreath && (
           <div className="pt-4 border-t border-line">
             <label className="label-text text-muted mb-3 block">{t("compose.section.scope")}</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-4 gap-2">
               {(
                 [
-                  { v: "public", label: "🌍 public" },
-                  { v: "network", label: "🏘️ network" },
-                  { v: "circle", label: "👥 circle" },
-                  { v: "private", label: "🔒 private" },
-                ] as { v: Scope; label: string }[]
-              ).map(({ v, label }) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => {
-                    setScope(v);
-                    setTtl(null); // reset to scope-default
-                  }}
-                  data-selected={scope === v}
-                  className="topic-chip"
-                >
-                  {label}
-                </button>
-              ))}
+                  { v: "public", label: "public", mascot: "scope-public" as MascotName },
+                  { v: "network", label: "network", mascot: "scope-network" as MascotName },
+                  { v: "circle", label: "village", mascot: "scope-village" as MascotName },
+                  { v: "private", label: "private", mascot: "scope-private" as MascotName },
+                ] as { v: Scope; label: string; mascot: MascotName }[]
+              ).map(({ v, label, mascot }) => {
+                const selected = scope === v;
+                return (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => {
+                      setScope(v);
+                      setTtl(null); // reset to scope-default
+                    }}
+                    aria-pressed={selected}
+                    className={`flex flex-col items-center gap-1.5 p-2 transition border ${
+                      selected
+                        ? "border-red bg-red/5"
+                        : "border-line hover:border-ink"
+                    }`}
+                  >
+                    <MascotIcon name={mascot} size={44} alt={label} />
+                    <span className={`mono-text text-[10px] uppercase tracking-wider ${selected ? "text-red" : "text-ink"}`}>
+                      {label}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}

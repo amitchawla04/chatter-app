@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { ChatterMark } from "@/components/ChatterMark";
 import { PactViolationForm } from "@/components/PactViolationForm";
+import { MascotIcon } from "@/components/MascotIcon";
 
 export const metadata = {
   title: "The Chatter Pact — 14 commitments",
@@ -67,6 +68,7 @@ export default function PactPage() {
 
       <section className="flex-1 px-6 sm:px-10 py-12 sm:py-20">
         <div className="max-w-2xl mx-auto w-full">
+          <MascotIcon name="brand-pact" size={96} className="mb-6" alt="The Chatter Pact" />
           <p className="label-text text-red mb-6">The Chatter Pact · v1.3</p>
           <h1 className="display-text text-4xl sm:text-5xl text-ink mb-5">
             14 commitments we make to you.
