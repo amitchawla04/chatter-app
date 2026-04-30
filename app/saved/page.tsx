@@ -3,10 +3,10 @@
  * Feature B1 from 03-FEATURE-INVENTORY.md.
  */
 import { redirect } from "next/navigation";
-import { Bookmark } from "lucide-react";
 import { ChatterMark } from "@/components/ChatterMark";
 import { TabBar } from "@/components/TabBar";
 import { WhisperCard } from "@/components/WhisperCard";
+import { EmptyState } from "@/components/EmptyState";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
@@ -57,17 +57,11 @@ export default async function SavedPage() {
       </header>
 
       {whispers.length === 0 ? (
-        <section className="flex-1 px-6 py-20 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 rounded-full border border-line flex items-center justify-center mb-6">
-            <Bookmark size={22} strokeWidth={1.3} className="text-muted" />
-          </div>
-          <h2 className="display-text text-2xl text-ink mb-3 max-w-md">
-            {t("saved.empty.heading")}
-          </h2>
-          <p className="body-text text-muted max-w-xs">
-            {t("saved.empty.body")}
-          </p>
-        </section>
+        <EmptyState
+          heading={t("saved.empty.heading")}
+          body={t("saved.empty.body")}
+          cta={{ label: "find a whisper to save", href: "/explore" }}
+        />
       ) : (
         <section>
           {whispers.map((w) => (

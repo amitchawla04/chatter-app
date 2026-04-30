@@ -4,9 +4,9 @@
  */
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Bell } from "lucide-react";
 import { ChatterMark } from "@/components/ChatterMark";
 import { TabBar } from "@/components/TabBar";
+import { EmptyState } from "@/components/EmptyState";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { relativeTime } from "@/lib/whisper";
@@ -56,17 +56,11 @@ export default async function ActivityPage() {
       </header>
 
       {echoes.length === 0 ? (
-        <section className="px-6 py-20 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 rounded-full border border-line flex items-center justify-center mb-6">
-            <Bell size={22} strokeWidth={1.3} className="text-muted" />
-          </div>
-          <h2 className="display-text text-2xl text-ink mb-3 max-w-md">
-            {t("activity.empty.heading")}
-          </h2>
-          <p className="body-text text-muted max-w-xs">
-            {t("activity.empty.body")}
-          </p>
-        </section>
+        <EmptyState
+          heading={t("activity.empty.heading")}
+          body={t("activity.empty.body")}
+          cta={{ label: "go whisper something", href: "/compose" }}
+        />
       ) : (
         <section>
           {echoes.map((e, i) => (
