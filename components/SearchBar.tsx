@@ -193,16 +193,16 @@ export function SearchBar({ initial = "" }: { initial?: string }) {
       </form>
 
       {open && suggestions.length > 0 && (
-        <ul
+        <div
           id="search-suggestions"
           role="listbox"
           aria-label="Search suggestions"
           className="absolute left-0 right-0 mt-1 z-40 bg-paper border border-line shadow-sm max-h-72 overflow-y-auto"
         >
           {q.trim().length < 2 && recents.length > 0 && (
-            <li className="px-3 py-2 mono-text text-[10px] uppercase tracking-wider text-muted border-b border-line/60" aria-hidden="true">
+            <div className="px-3 py-2 mono-text text-[10px] uppercase tracking-wider text-muted border-b border-line/60" aria-hidden="true">
               recent
-            </li>
+            </div>
           )}
           {suggestions.map((s, i) => {
             const isActive = i === activeIdx;
@@ -212,12 +212,15 @@ export function SearchBar({ initial = "" }: { initial?: string }) {
             if (s.kind === "recent") {
               const id = `sugg-recent-${i}`;
               return (
-                <li key={id} className="flex items-stretch border-b border-line/40 last:border-b-0">
+                <div
+                  key={id}
+                  id={id}
+                  role="option"
+                  aria-selected={isActive}
+                  className="flex items-stretch border-b border-line/40 last:border-b-0"
+                >
                   <button
-                    id={id}
                     type="button"
-                    role="option"
-                    aria-selected={isActive}
                     onMouseDown={(e) => {
                       e.preventDefault();
                       commit(s.label);
@@ -238,57 +241,55 @@ export function SearchBar({ initial = "" }: { initial?: string }) {
                   >
                     <X size={12} strokeWidth={1.5} aria-hidden="true" />
                   </button>
-                </li>
+                </div>
               );
             }
             if (s.kind === "topic") {
               const id = `sugg-t-${s.id}`;
               return (
-                <li key={id}>
-                  <button
-                    id={id}
-                    type="button"
-                    role="option"
-                    aria-selected={isActive}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      setOpen(false);
-                      router.push(`/t/${s.id}`);
-                    }}
-                    className={baseCls}
-                  >
-                    <span className="text-base shrink-0" aria-hidden="true">{s.emoji ?? "·"}</span>
-                    <span className="truncate">{s.label}</span>
-                    <span className="ml-auto mono-text text-[10px] text-muted shrink-0">topic</span>
-                  </button>
-                </li>
-              );
-            }
-            const id = `sugg-u-${s.handle}`;
-            return (
-              <li key={id}>
                 <button
                   id={id}
+                  key={id}
                   type="button"
                   role="option"
                   aria-selected={isActive}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     setOpen(false);
-                    router.push(`/u/${s.handle}`);
+                    router.push(`/t/${s.id}`);
                   }}
                   className={baseCls}
                 >
-                  <div className="w-5 h-5 rounded-full bg-line flex items-center justify-center text-[10px] shrink-0" aria-hidden="true">
-                    {s.label[0]?.toUpperCase() ?? "·"}
-                  </div>
-                  <span className="truncate">@{s.handle}</span>
-                  <span className="ml-auto mono-text text-[10px] text-muted shrink-0">person</span>
+                  <span className="text-base shrink-0" aria-hidden="true">{s.emoji ?? "·"}</span>
+                  <span className="truncate">{s.label}</span>
+                  <span className="ml-auto mono-text text-[10px] text-muted shrink-0">topic</span>
                 </button>
-              </li>
+              );
+            }
+            const id = `sugg-u-${s.handle}`;
+            return (
+              <button
+                id={id}
+                key={id}
+                type="button"
+                role="option"
+                aria-selected={isActive}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setOpen(false);
+                  router.push(`/u/${s.handle}`);
+                }}
+                className={baseCls}
+              >
+                <div className="w-5 h-5 rounded-full bg-line flex items-center justify-center text-[10px] shrink-0" aria-hidden="true">
+                  {s.label[0]?.toUpperCase() ?? "·"}
+                </div>
+                <span className="truncate">@{s.handle}</span>
+                <span className="ml-auto mono-text text-[10px] text-muted shrink-0">person</span>
+              </button>
             );
           })}
-        </ul>
+        </div>
       )}
     </div>
   );
