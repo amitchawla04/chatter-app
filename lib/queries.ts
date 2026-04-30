@@ -16,32 +16,51 @@ import {
  * Fetch the current user's trust filters: blocked author IDs + hidden words.
  * Returns empty sets/arrays when anonymous (no filtering needed).
  */
-export async function fetchTrustFilters(): Promise<{ blockedIds: Set<string>; hiddenWords: string[] }> {
+export async function fetchTrustFilters(): Promise<{
+  blockedIds: Set<string>;
+  hiddenWords: string[];
+  mutedTopicIds: Set<string>;
+}> {
   const supabase = await createServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { blockedIds: new Set(), hiddenWords: [] };
+  if (!user)
+    return { blockedIds: new Set(), hiddenWords: [], mutedTopicIds: new Set() };
 
   const admin = createAdminClient();
-  const [{ data: blocks }, { data: hidden }] = await Promise.all([
-    // both 'block' and 'mute' hide whispers from feeds; only 'block' hides profile (handled at profile-page level)
+  const [{ data: blocks }, { data: hidden }, { data: tMutes }] = await Promise.all([
     admin.from("blocks").select("blocked_id").eq("blocker_id", user.id),
     admin.from("hidden_words").select("word").eq("user_id", user.id),
+    admin.from("topic_mutes").select("topic_id, expires_at").eq("user_id", user.id),
   ]);
+  const now = Date.now();
+  const mutedTopicIds = new Set(
+    ((tMutes ?? []) as { topic_id: string; expires_at: string | null }[])
+      .filter((m) => !m.expires_at || new Date(m.expires_at).getTime() > now)
+      .map((m) => m.topic_id),
+  );
   return {
     blockedIds: new Set((blocks ?? []).map((b) => (b as { blocked_id: string }).blocked_id)),
     hiddenWords: (hidden ?? []).map((h) => (h as { word: string }).word.toLowerCase()),
+    mutedTopicIds,
   };
 }
 
 function applyTrustFilters<T extends WhisperRow>(
   rows: T[],
-  filters: { blockedIds: Set<string>; hiddenWords: string[] },
+  filters: { blockedIds: Set<string>; hiddenWords: string[]; mutedTopicIds: Set<string> },
 ): T[] {
-  if (filters.blockedIds.size === 0 && filters.hiddenWords.length === 0) return rows;
+  if (
+    filters.blockedIds.size === 0 &&
+    filters.hiddenWords.length === 0 &&
+    filters.mutedTopicIds.size === 0
+  ) {
+    return rows;
+  }
   return rows.filter((w) => {
     if (filters.blockedIds.has(w.author_id)) return false;
+    if (filters.mutedTopicIds.has(w.topic_id)) return false;
     if (filters.hiddenWords.length > 0) {
       const haystack = `${w.content_text ?? ""} ${w.content_transcript ?? ""}`.toLowerCase();
       if (filters.hiddenWords.some((word) => haystack.includes(word))) return false;

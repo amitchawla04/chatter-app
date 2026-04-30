@@ -31,6 +31,7 @@ function ensureVapid(): boolean {
 
 export type ChatterNotificationKind =
   | "pass.received"
+  | "pass.thanked"
   | "live.starts"
   | "vouch.received"
   | "thread.invited"

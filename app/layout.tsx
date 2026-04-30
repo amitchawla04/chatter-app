@@ -4,6 +4,7 @@ import "./globals.css";
 import { getLocale } from "@/lib/i18n-server";
 import { I18nProvider } from "@/components/I18nProvider";
 import { IOSInstallHint } from "@/components/IOSInstallHint";
+import { EmergencyBanner } from "@/components/EmergencyBanner";
 import enDict from "@/messages/en.json";
 import esDict from "@/messages/es.json";
 import ptDict from "@/messages/pt.json";
@@ -108,6 +109,7 @@ export default async function RootLayout({
       <body className="bg-canvas text-ink font-body antialiased">
         <I18nProvider locale={locale} dict={dict} fallback={DICTS.en}>
           <a href="#main-content" className="skip-link">skip to content</a>
+          <EmergencyBanner />
           <IOSInstallHint />
           <div id="main-content">{children}</div>
         </I18nProvider>

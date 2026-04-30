@@ -340,6 +340,66 @@ textarea:focus-visible {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* ─── Designer pass: shimmer skeleton (intentional, not generic) ─── */
+@keyframes chatterShimmer {
+  0% { background-position: -120% 0; }
+  100% { background-position: 220% 0; }
+}
+.chatter-shimmer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 45, 45, 0.06) 50%,
+    transparent 100%
+  );
+  background-size: 50% 100%;
+  background-repeat: no-repeat;
+  animation: chatterShimmer 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chatter-shimmer::before { animation: none; }
+}
+
+/* ─── Designer pass: route transition fade-in (Surface 13.3 opening moment) ─── */
+@keyframes chatterRouteEnter {
+  0%   { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.chatter-route-enter > * {
+  animation: chatterRouteEnter 320ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chatter-route-enter > * { animation: none; }
+}
+
+/* ─── Designer pass: action button bloom (echo, vouch, save) ─── */
+@keyframes chatterBloom {
+  0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(255, 45, 45, 0.5); }
+  60%  { transform: scale(1.18); box-shadow: 0 0 0 16px rgba(255, 45, 45, 0); }
+  100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(255, 45, 45, 0); }
+}
+.chatter-bloom { animation: chatterBloom 480ms ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .chatter-bloom { animation: none; }
+}
+
+/* ─── Empty-state illustration (period-with-personality) ─── */
+@keyframes chatterEmptyBreath {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.08); }
+}
+.chatter-empty-breath {
+  animation: chatterEmptyBreath 2400ms ease-in-out infinite;
+  will-change: transform, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chatter-empty-breath { animation: none; opacity: 1; transform: none; }
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;

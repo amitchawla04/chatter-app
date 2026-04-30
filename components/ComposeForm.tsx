@@ -37,12 +37,21 @@ interface Topic {
   emoji: string | null;
 }
 
+interface QuotePreview {
+  id: string;
+  excerpt: string;
+  author_handle: string;
+  topic_name: string;
+  topic_emoji: string | null;
+}
+
 interface Props {
   topics: Topic[];
   initialTopicId?: string;
+  quote?: QuotePreview | null;
 }
 
-export function ComposeForm({ topics, initialTopicId }: Props) {
+export function ComposeForm({ topics, initialTopicId, quote }: Props) {
   const router = useRouter();
   const t = useT();
   const [modality, setModality] = useState<Modality>("text");
@@ -126,6 +135,7 @@ export function ComposeForm({ topics, initialTopicId }: Props) {
       if (requireReplyApproval) fd.set("require_reply_approval", "on");
       if (mediaUrl) fd.set("media_url", mediaUrl);
       if (mediaDuration) fd.set("media_duration", String(mediaDuration));
+      if (quote?.id) fd.set("quote_id", quote.id);
 
       const res = await postWhisper(fd);
       if (!res.ok) {
@@ -167,6 +177,20 @@ export function ComposeForm({ topics, initialTopicId }: Props) {
       </header>
 
       <form id="compose-form" onSubmit={submit} className="flex-1 p-5 space-y-6">
+        {/* Quote-whisper preview (6.18) */}
+        {quote && (
+          <aside className="border border-gold/40 bg-gold/5 p-4">
+            <p className="mono-text text-[10px] uppercase tracking-wider text-red mb-2">
+              quoting · @{quote.author_handle}
+              {quote.topic_emoji && (
+                <span className="ml-2">{quote.topic_emoji} {quote.topic_name}</span>
+              )}
+            </p>
+            <p className="display-italic text-base text-ink leading-snug line-clamp-3">
+              &ldquo;{quote.excerpt}&rdquo;
+            </p>
+          </aside>
+        )}
         {/* Topic chip row */}
         <div>
           <label className="label-text text-muted mb-3 block">{t("compose.section.to")}</label>

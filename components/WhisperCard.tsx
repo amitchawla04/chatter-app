@@ -27,6 +27,9 @@ import { toggleEcho, toggleSave } from "@/lib/engagement-actions";
 import { blockUser, muteUser } from "@/lib/trust-actions";
 import { PassSheet } from "./PassSheet";
 import { CharterBadge } from "./CharterBadge";
+import { ImageLightbox } from "./ImageLightbox";
+import { LinkPreview, firstUrl } from "./LinkPreview";
+import { TopicMuteSheet } from "./TopicMuteSheet";
 
 interface WhisperCardProps {
   whisper: WhisperRow;
@@ -78,6 +81,7 @@ export function WhisperCard({
       : whisper.content_text ?? "";
 
   const obscured = whisper.is_spoiler && !spoilerRevealed;
+  const detectedUrl = firstUrl(quoteText);
 
   const handleEcho = () => {
     if (!isAuthed) {
@@ -141,6 +145,7 @@ export function WhisperCard({
   const [replyOpen, setReplyOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [topicMuteOpen, setTopicMuteOpen] = useState(false);
   const longPressTimer = useRef<number | null>(null);
   const longPressOrigin = useRef<{ x: number; y: number } | null>(null);
   const longPressFired = useRef<boolean>(false);
@@ -292,6 +297,11 @@ export function WhisperCard({
           )}
         </div>
 
+        {/* Open Graph preview for first URL in body (IP2) */}
+        {detectedUrl && !obscured && whisper.modality === "text" && (
+          <LinkPreview url={detectedUrl} />
+        )}
+
         {/* Inline insider correction strip — Pact 5/11: truth visible in feed, not buried in detail */}
         {correction && (
           <Link
@@ -424,9 +434,19 @@ export function WhisperCard({
                   }}
                 />
                 <div
-                  className="absolute right-0 top-full mt-1 z-40 min-w-[160px] bg-canvas border border-line shadow-sm py-1 mono-text text-xs"
+                  className="absolute right-0 top-full mt-1 z-40 min-w-[180px] bg-canvas border border-line shadow-sm py-1 mono-text text-xs"
                   onClick={(e) => e.stopPropagation()}
                 >
+                  {isAuthed && (
+                    <Link
+                      href={`/compose?quoteId=${whisper.id}`}
+                      onClick={() => setMenuOpen(false)}
+                      className="w-full text-left px-3 py-2 hover:bg-paper text-ink flex items-center gap-2 no-underline-link"
+                    >
+                      <span className="w-3.5">”</span>
+                      <span>Quote whisper</span>
+                    </Link>
+                  )}
                   <button
                     type="button"
                     onClick={() => {
@@ -438,6 +458,19 @@ export function WhisperCard({
                     <span className="w-3.5">→</span>
                     <span>Hide this whisper</span>
                   </button>
+                  {isAuthed && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setTopicMuteOpen(true);
+                      }}
+                      className="w-full text-left px-3 py-2 hover:bg-paper text-ink flex items-center gap-2"
+                    >
+                      <VolumeX size={12} strokeWidth={1.5} />
+                      <span>Mute {whisper.topic.name}</span>
+                    </button>
+                  )}
                   {isAuthed && (
                     <button
                       type="button"
@@ -500,6 +533,15 @@ export function WhisperCard({
           topicId={whisper.topic_id}
           parentExcerpt={quoteText.slice(0, 80)}
           onClose={() => setReplyOpen(false)}
+        />
+      )}
+
+      {topicMuteOpen && (
+        <TopicMuteSheet
+          topicId={whisper.topic.id}
+          topicName={whisper.topic.name}
+          onClose={() => setTopicMuteOpen(false)}
+          onMuted={() => setHidden(true)}
         />
       )}
     </>
@@ -735,19 +777,33 @@ function VoiceBlock({ url, duration }: { url: string | null; duration: number })
 }
 
 function ImageBlock({ url }: { url: string | null }) {
+  const [open, setOpen] = useState(false);
   if (!url || !url.startsWith("http")) {
     // No image attached or seed-placeholder URL — render nothing rather than show
     // a broken/empty preview frame.
     return null;
   }
   return (
-    /* eslint-disable-next-line @next/next/no-img-element */
-    <img
-      src={url}
-      alt="whisper attachment"
-      className="w-full max-h-96 object-cover border border-line mb-3"
-      loading="lazy"
-      decoding="async"
-    />
+    <>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(true);
+        }}
+        className="block w-full p-0 border-0 bg-transparent mb-3 group"
+        aria-label="Open image"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={url}
+          alt="whisper attachment"
+          className="w-full max-h-96 object-cover border border-line transition-opacity group-hover:opacity-95"
+          loading="lazy"
+          decoding="async"
+        />
+      </button>
+      {open && <ImageLightbox url={url} onClose={() => setOpen(false)} />}
+    </>
   );
 }

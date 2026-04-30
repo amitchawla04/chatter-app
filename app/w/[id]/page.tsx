@@ -10,6 +10,7 @@ import { TabBar } from "@/components/TabBar";
 import { WhisperCard } from "@/components/WhisperCard";
 import { ReplyComposer } from "@/components/ReplyComposer";
 import { CorrectionButton } from "@/components/CorrectionButton";
+import { WhisperEngagementMeta } from "@/components/WhisperEngagementMeta";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import {
@@ -203,6 +204,14 @@ export default async function WhisperDetailPage({
         isAuthed={isAuthed}
       />
 
+      {/* Engagement meta — Surface 7.2-7.4: who echoed, who passed */}
+      <WhisperEngagementMeta
+        whisperId={whisper.id}
+        echoCount={whisper.echo_count ?? 0}
+        passCount={whisper.pass_count ?? 0}
+        insiderEchoCount={await fetchInsiderEchoCount(admin, whisper.id)}
+      />
+
       {/* Corrections strip — if insiders pushed back */}
       {corrections.length > 0 && (
         <section className="mx-5 my-4 border border-gold/30 bg-gold/5 p-4">
@@ -279,6 +288,20 @@ export default async function WhisperDetailPage({
       <TabBar />
     </main>
   );
+}
+
+async function fetchInsiderEchoCount(
+  admin: ReturnType<typeof createAdminClient>,
+  whisperId: string,
+): Promise<number> {
+  const { data } = await admin
+    .from("echoes")
+    .select("user_id, users:user_id ( insider_tags )")
+    .eq("whisper_id", whisperId)
+    .limit(60);
+  if (!data) return 0;
+  const rows = data as unknown as { users: { insider_tags: string[] | null } | null }[];
+  return rows.filter((r) => (r.users?.insider_tags?.length ?? 0) > 0).length;
 }
 
 function AuthorTools({ whisperId }: { whisperId: string }) {

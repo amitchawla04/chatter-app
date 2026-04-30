@@ -182,6 +182,102 @@ export async function reviewInsiderClaim(input: {
   return { ok: true };
 }
 
+/** Mute a topic for a duration. duration='1h'|'24h'|'7d'|'forever'. */
+export async function muteTopic(input: {
+  topicId: string;
+  duration: "1h" | "24h" | "7d" | "forever";
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const me = await getMe();
+  if (!me) return { ok: false, error: "sign-in required" };
+  let expiresAt: string | null = null;
+  if (input.duration === "1h") {
+    expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+  } else if (input.duration === "24h") {
+    expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  } else if (input.duration === "7d") {
+    expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  }
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("topic_mutes")
+    .upsert(
+      { user_id: me.id, topic_id: input.topicId, expires_at: expiresAt },
+      { onConflict: "user_id,topic_id" },
+    );
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/home");
+  revalidatePath(`/t/${input.topicId}`);
+  revalidatePath("/settings/privacy");
+  return { ok: true };
+}
+
+export async function unmuteTopic(topicId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const me = await getMe();
+  if (!me) return { ok: false, error: "sign-in required" };
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("topic_mutes")
+    .delete()
+    .eq("user_id", me.id)
+    .eq("topic_id", topicId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/home");
+  revalidatePath(`/t/${topicId}`);
+  revalidatePath("/settings/privacy");
+  return { ok: true };
+}
+
+/** Archive a pass — author hides it from the inbox. */
+export async function archivePass(passId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const me = await getMe();
+  if (!me) return { ok: false, error: "sign-in required" };
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("passes")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", passId)
+    .eq("to_user_id", me.id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/passes");
+  return { ok: true };
+}
+
+/** Thank the sender of a pass — sends a tiny acknowledgement back. */
+export async function thankPassSender(passId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const me = await getMe();
+  if (!me) return { ok: false, error: "sign-in required" };
+  const admin = createAdminClient();
+
+  const { data: pass } = await admin
+    .from("passes")
+    .select("from_user_id, to_user_id, thanked_at")
+    .eq("id", passId)
+    .maybeSingle();
+  if (!pass) return { ok: false, error: "pass not found" };
+  const row = pass as { from_user_id: string; to_user_id: string; thanked_at: string | null };
+  if (row.to_user_id !== me.id) return { ok: false, error: "not yours to thank" };
+  if (row.thanked_at) return { ok: true };
+
+  await admin
+    .from("passes")
+    .update({ thanked_at: new Date().toISOString() })
+    .eq("id", passId);
+
+  // Push notify the sender — they'll see "@you thanked you for the pass"
+  const { notifyUser } = await import("@/lib/push");
+  const { data: meRow } = await admin.from("users").select("handle").eq("id", me.id).maybeSingle();
+  const handle = (meRow as { handle: string } | null)?.handle ?? "someone";
+  notifyUser(row.from_user_id, {
+    kind: "pass.thanked",
+    title: `@${handle} appreciated your pass`,
+    body: "thanks for the whisper.",
+    url: "/passes",
+  }).catch(() => {});
+
+  revalidatePath("/passes");
+  return { ok: true };
+}
+
 export async function vouchFor(input: {
   topicId: string;
   targetUserId?: string | null;

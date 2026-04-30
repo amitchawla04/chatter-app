@@ -67,6 +67,8 @@ const ROUTES: CertRoute[] = [
   { path: "/founder/invites", label: "39-founder-invites" },
   { path: "/founder/insider-claims", label: "40-founder-insider-claims" },
   { path: "/moderation", label: "41-moderation" },
+  { path: "/brand/logos", label: "42-brand-logos-v1" },
+  { path: "/brand/logos-v2", label: "43-brand-logos-v2" },
 ];
 
 interface RouteReport {

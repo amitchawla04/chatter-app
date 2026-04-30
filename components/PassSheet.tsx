@@ -1,18 +1,15 @@
 "use client";
 
 /**
- * PassSheet — bottom sheet to pass a whisper to one specific user.
- * Visual DNA Principle 6: pass-signature move. 1:1 distribution, distinct from broadcast.
+ * PassSheet — bottom sheet to pass a whisper to one or more people.
+ * Visual DNA Principle 6: pass-signature move. Distinct from broadcast.
  *
- * Accessibility:
- *  - role="dialog" + aria-modal + aria-labelledby
- *  - Escape closes
- *  - focus restored on close (via useEffect cleanup)
- *  - keyboard reachable
+ * Multi-recipient: tap to toggle. Up to 5 recipients per pass (IP5).
+ * Note travels with all recipients in the batch.
  */
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { X, Send } from "lucide-react";
+import { X, Send, Check } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { passWhisper } from "@/lib/engagement-actions";
 
@@ -22,6 +19,8 @@ interface Recipient {
   display_name: string;
   insider_tags: string[] | null;
 }
+
+const MAX_RECIPIENTS = 5;
 
 export function PassSheet({
   whisperId,
@@ -34,14 +33,13 @@ export function PassSheet({
 }) {
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<Recipient | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [note, setNote] = useState("");
-  const [sent, setSent] = useState(false);
+  const [sentCount, setSentCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const previouslyFocused = useRef<HTMLElement | null>(null);
 
-  // Escape closes + focus restoration on unmount
   useEffect(() => {
     previouslyFocused.current = document.activeElement as HTMLElement | null;
     const onKey = (e: KeyboardEvent) => {
@@ -59,8 +57,6 @@ export function PassSheet({
   useEffect(() => {
     const load = async () => {
       const supabase = createClient();
-      // For v1: load the 20 most-active users (trust_score proxy).
-      // v2 will load from user's vouch graph / contact import.
       const { data, error: err } = await supabase
         .from("users")
         .select("id, handle, display_name, insider_tags")
@@ -74,20 +70,42 @@ export function PassSheet({
     load();
   }, []);
 
+  const toggle = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        if (next.size >= MAX_RECIPIENTS) return prev;
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const selectedList = recipients.filter((r) => selectedIds.has(r.id));
+
   const handleSend = () => {
-    if (!selected) return;
+    if (selectedIds.size === 0) return;
     setError(null);
     startTransition(async () => {
-      const res = await passWhisper({
-        whisperId,
-        toUserId: selected.id,
-        note: note.trim() || undefined,
-      });
-      if (!res.ok) {
-        setError(res.error ?? "couldn't pass. try again.");
+      const trimmedNote = note.trim() || undefined;
+      let okCount = 0;
+      let firstError: string | null = null;
+      for (const r of selectedList) {
+        const res = await passWhisper({
+          whisperId,
+          toUserId: r.id,
+          note: trimmedNote,
+        });
+        if (res.ok) okCount++;
+        else if (!firstError) firstError = res.error ?? "couldn't pass.";
+      }
+      if (okCount === 0) {
+        setError(firstError ?? "couldn't pass. try again.");
         return;
       }
-      setSent(true);
+      setSentCount(okCount);
       setTimeout(onClose, 1400);
     });
   };
@@ -106,16 +124,18 @@ export function PassSheet({
       >
         <div className="flex items-center justify-between mb-5">
           <h2 id="pass-sheet-title" className="display-italic text-xl text-ink">pass this whisper</h2>
-          <button type="button" onClick={onClose} className="text-muted hover:text-ink">
+          <button type="button" onClick={onClose} className="text-muted hover:text-ink" aria-label="Close">
             <X size={22} strokeWidth={1.5} />
           </button>
         </div>
 
-        {sent ? (
+        {sentCount > 0 ? (
           <div className="py-12 text-center">
             <p className="display-italic text-2xl text-red mb-2">delivered.</p>
             <p className="mono-text text-xs text-muted">
-              @{selected?.handle} will see it in their passes.
+              {sentCount === 1
+                ? `${selectedList[0].handle ? "@" + selectedList[0].handle : "they"} will see it in their passes.`
+                : `${sentCount} villagers will see it in their passes.`}
             </p>
           </div>
         ) : (
@@ -124,41 +144,58 @@ export function PassSheet({
               &ldquo;{whisperExcerpt}…&rdquo;
             </p>
 
-            <p className="label-text text-muted mb-3">to (one person)</p>
+            <div className="flex items-center justify-between mb-3">
+              <p className="label-text text-muted">to · pick up to {MAX_RECIPIENTS}</p>
+              {selectedIds.size > 0 && (
+                <span className="mono-text text-[11px] text-red">
+                  {selectedIds.size}/{MAX_RECIPIENTS} selected
+                </span>
+              )}
+            </div>
 
             {loading ? (
               <p className="mono-text text-xs text-muted py-4">loading your village…</p>
             ) : (
               <div className="max-h-56 overflow-y-auto -mx-5 sm:-mx-6 px-5 sm:px-6 mb-5">
-                {recipients.map((r) => (
-                  <button
-                    key={r.id}
-                    type="button"
-                    onClick={() => setSelected(r)}
-                    className={`w-full text-left flex items-center gap-3 py-2.5 border-b border-line/50 transition-colors ${
-                      selected?.id === r.id ? "bg-gold/10" : "hover:bg-paper"
-                    }`}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-line flex items-center justify-center text-xs text-ink">
-                      {r.display_name[0]?.toUpperCase() ?? "·"}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm text-ink truncate">@{r.handle}</div>
-                      {r.insider_tags && r.insider_tags.length > 0 && (
-                        <div className="mono-text text-[10px] text-red italic truncate">
-                          {r.insider_tags[0].replace(/_/g, " ")}
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                ))}
+                {recipients.map((r) => {
+                  const isSelected = selectedIds.has(r.id);
+                  const disabled = !isSelected && selectedIds.size >= MAX_RECIPIENTS;
+                  return (
+                    <button
+                      key={r.id}
+                      type="button"
+                      onClick={() => toggle(r.id)}
+                      disabled={disabled}
+                      className={`w-full text-left flex items-center gap-3 py-2.5 border-b border-line/50 transition-colors ${
+                        isSelected ? "bg-red/10" : "hover:bg-paper"
+                      } ${disabled ? "opacity-30 cursor-not-allowed" : ""}`}
+                      aria-pressed={isSelected}
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs transition-colors ${
+                          isSelected ? "bg-red text-paper" : "bg-line text-ink"
+                        }`}
+                      >
+                        {isSelected ? <Check size={14} strokeWidth={2} /> : (r.display_name[0]?.toUpperCase() ?? "·")}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-ink truncate">@{r.handle}</div>
+                        {r.insider_tags && r.insider_tags.length > 0 && (
+                          <div className="mono-text text-[10px] text-red italic truncate">
+                            {r.insider_tags[0].replace(/_/g, " ")}
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
 
-            {selected && (
+            {selectedIds.size > 0 && (
               <div className="mb-5">
                 <label className="label-text text-muted block mb-2">
-                  note (optional)
+                  note (optional · same for all)
                 </label>
                 <input
                   type="text"
@@ -175,11 +212,15 @@ export function PassSheet({
             <button
               type="button"
               onClick={handleSend}
-              disabled={!selected}
+              disabled={selectedIds.size === 0}
               className="btn-primary w-full justify-center"
             >
               <Send size={16} strokeWidth={1.5} />
-              {selected ? `pass to @${selected.handle}` : "pick a recipient"}
+              {selectedIds.size === 0
+                ? "pick a recipient"
+                : selectedIds.size === 1
+                ? `pass to @${selectedList[0]?.handle}`
+                : `pass to ${selectedIds.size} villagers`}
             </button>
           </>
         )}

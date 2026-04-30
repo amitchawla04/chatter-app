@@ -31,6 +31,7 @@ export async function postWhisper(formData: FormData) {
   const mediaUrl = (formData.get("media_url") as string | null) ?? null;
   const mediaDurationRaw = formData.get("media_duration") as string | null;
   const mediaDuration = mediaDurationRaw ? parseInt(mediaDurationRaw, 10) : null;
+  const quoteId = ((formData.get("quote_id") as string | null) ?? "").trim() || null;
 
   const isBreath = requestedModality === "breath";
   // Breath rules: 60-char cap, village-locked, 24h TTL
@@ -104,13 +105,14 @@ export async function postWhisper(formData: FormData) {
     content_media_url: mediaUrl,
     content_duration_sec: mediaDuration,
     scope,
-    kind: "opinion",
+    kind: quoteId ? "quote" : "opinion",
     is_whisper_tier: false,
     is_breath: isBreath,
     is_spoiler: isSpoiler,
     require_reply_approval: requireReplyApproval,
     ttl,
     expires_at: expiresAt,
+    quote_id: quoteId,
   });
 
   if (insertError) {

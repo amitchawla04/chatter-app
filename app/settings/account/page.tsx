@@ -3,8 +3,7 @@
  */
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Pause, Play } from "lucide-react";
-import { ChatterMark } from "@/components/ChatterMark";
+import { Pause, Play, LogOut } from "lucide-react";
 import { TabBar } from "@/components/TabBar";
 import { PauseAccountForm } from "@/components/PauseAccountForm";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
@@ -72,6 +71,23 @@ export default async function AccountPage() {
             </div>
           </div>
           <PauseAccountForm paused={Boolean(me?.paused_at)} />
+        </div>
+
+        <div className="border border-line p-5 bg-paper">
+          <div className="flex items-start gap-3 mb-3">
+            <LogOut size={18} strokeWidth={1.5} className="text-muted mt-0.5" />
+            <div className="flex-1">
+              <h2 className="display-italic text-lg text-ink">sign out everywhere</h2>
+              <p className="mono-text text-[11px] text-muted mt-1">
+                ends every active session — phone, web, other browsers. you&rsquo;ll need to sign in again on each device.
+              </p>
+            </div>
+          </div>
+          <form action="/auth/sign-out?scope=global" method="post">
+            <button type="submit" className="btn-secondary w-full justify-center">
+              sign out everywhere
+            </button>
+          </form>
         </div>
 
         <div className="border border-warn/40 p-5 bg-paper">
